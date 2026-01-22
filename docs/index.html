@@ -69,10 +69,10 @@
       display: inline-block;
       margin-top: 14px;
 
-      font-size: 1.05em;      /* slightly clearer */
+      font-size: 1.05em;
       color: #6a6a6a;
 
-      padding: 12px 8px;      /* invisible finger comfort */
+      padding: 12px 8px;
       border-radius: 10px;
 
       cursor: pointer;
@@ -105,13 +105,24 @@
   </div>
 
   <script>
-    // Race context (quiet label, future multi-race ready)
-    const raceContext = document.getElementById('raceContext');
+    // --- URL params (quiet config; no UI change) ---
     const params = new URLSearchParams(window.location.search);
+
+    // Race context (future multi-race ready)
+    const raceContext = document.getElementById('raceContext');
     const race = params.get('race');
     if (raceContext) {
       raceContext.textContent = race ? `Race ${race}` : "Race";
     }
+
+    // Venue context:
+    //   venue=ptp    (shared space, cultural phrases may appear)
+    //   venue=course (purpose-built, fenced routes; cultural phrases omitted)
+    const venue = (params.get('venue') || 'ptp').toLowerCase(); // 'ptp' | 'course'
+
+    // Landmark label (only swaps nouns; keeps tone stable)
+    // Examples: landmark=shopping%20village | trade%20stands | retail%20village | main%20concourse
+    const landmark = params.get('landmark') || 'the busiest part of the course';
 
     // Smart back: avoids returning to GitHub Pages settings when testing on laptop
     function goBackSmart() {
@@ -119,8 +130,15 @@
         window.history.back();
         return;
       }
-      // Fallback stays within your GitHub Pages site
       window.location.href = "./";
+    }
+
+    // --- session-only repetition counter (no identity, no tracking across sessions) ---
+    function bumpAsked(id) {
+      const key = `asked_${id}`;
+      const n = Number(sessionStorage.getItem(key) || "0") + 1;
+      sessionStorage.setItem(key, String(n));
+      return n;
     }
 
     (function () {
@@ -129,7 +147,87 @@
       const status = document.getElementById('statusLine');
       const panel = document.getElementById('answerText');
 
-      // Step 4: Intent cards (factual expansion, companion tone)
+      // --- Protected / contextual answer library (Option 3 alignment) ---
+      const ANSWERS = {
+        loo: {
+          kind: "protected",
+          tags: ["orientation", "body", "high"],
+          text: ({ venue, landmark }) => {
+            if (venue === "ptp") {
+              return `You’re not the only one to ask — it’s good to know early. At point-to-points the loos are usually portable and set up in a few different spots. If you head towards the ${landmark} or the busiest part of the course, you’ll usually find one nearby, with signs once you’re close.`;
+            }
+            // purpose-built course
+            return `You’re not the only one to ask — it’s good to know early. The nearest loos are usually just off the main concourse, close to the parade ring. There are signs once you’re close, and it’s worth noting there’s often another set a little further round if the nearest ones are busy later on.`;
+          }
+        },
+
+        carpark_entrance: {
+          kind: "protected",
+          tags: ["orientation", "exit", "high"],
+          text: () =>
+            `It’s a common question at the end of the day — you’re not the only one. The car park entrance is usually reached by following the main exit routes from the course. If you head towards where most people are leaving, the signs should guide you once you’re close.`
+        },
+
+        food: {
+          kind: "protected",
+          tags: ["comfort", "social", "medium"],
+          text: ({ venue, landmark }) => {
+            if (venue === "ptp") {
+              return `Food and coffee are usually around the ${landmark} or the main gathering areas. They’re often busiest just before and between races — which is also when you tend to bump into familiar faces.`;
+            }
+            return `Food and coffee are usually around the main concourse and gathering areas. They’re often busiest just before and between races — which is also when you tend to bump into familiar faces.`;
+          }
+        },
+
+        first_race_time: {
+          kind: "protected",
+          tags: ["timing", "arrival", "medium"],
+          // Placeholder by design — you’ll later feed this from the gate card / schedule
+          text: () =>
+            `The first race is usually at [time]. You’ve got a bit of breathing space before it starts — enough time to get your bearings and enjoy the build-up.`
+        },
+
+        num_races: {
+          kind: "protected",
+          tags: ["timing", "planning", "medium"],
+          // Placeholder by design — you’ll later feed this from the gate card / schedule
+          text: () =>
+            `There are usually [number] races on the card today. It’s a helpful one to know on arrival, especially if you’re planning to leave before the final queues build up.`
+        },
+
+        mind_your_backs: {
+          kind: "cultural",
+          tags: ["ptp_only", "cultural"],
+          text: ({ venue }) => {
+            if (venue !== "ptp") return ""; // omit entirely at purpose-built venues
+            return `You may hear “mind your backs, please” — it’s a polite way of saying there’s a horse coming through behind you, so on hearing it, it’s best to step aside.`;
+          }
+        }
+      };
+
+      // Repetition softening: stays consistent, becomes more direct, never says “as I said earlier”
+      function softenIfRepeated(answerId, text, meta) {
+        const askedCount = bumpAsked(answerId);
+        const isOrientation = meta?.tags?.includes("orientation");
+
+        if (!isOrientation || askedCount <= 1) return text;
+
+        // Shorter, movement-first variants
+        if (answerId === "loo") {
+          if (venue === "ptp") {
+            return `Loos are usually near the ${landmark} or the main gathering areas. Head towards the busiest part of the course — the signs will guide you once you’re close.`;
+          }
+          return `Loos are usually just off the main concourse near the parade ring. Head that way — the signs will guide you once you’re close.`;
+        }
+
+        if (answerId === "carpark_entrance") {
+          return `Car park entrance is usually reached via the main exit routes. Head towards where most people are leaving — signs should guide you once you’re close.`;
+        }
+
+        return text;
+      }
+
+      // --- Your existing “intent cards” retained ---
       const intents = [
         {
           id: "form",
@@ -175,13 +273,55 @@
         }
       ];
 
-      let intentIndex = 0;
+      // Context object for templating answers
+      const CONTEXT = { venue, landmark, race };
+
+      // Sequence: mixes your intent cards with protected/cultural items.
+      // This is temporary until real question selection exists.
+      const SEQUENCE = [
+        { type: "intent", id: "how-to-read" },
+        { type: "protected", id: "first_race_time" },
+        { type: "protected", id: "loo" },
+        { type: "intent", id: "term" },
+        { type: "intent", id: "going" },
+        { type: "protected", id: "food" },
+        { type: "intent", id: "form" },
+        { type: "intent", id: "colours" },
+        { type: "intent", id: "race-type" },
+        { type: "protected", id: "num_races" },
+        { type: "protected", id: "carpark_entrance" },
+        { type: "cultural", id: "mind_your_backs" }
+      ];
+
+      let seqIndex = 0;
       let state = "idle"; // idle | listening | answering
 
-      function showAnswer() {
-        const intent = intents[intentIndex % intents.length];
-        panel.textContent = intent.answer;
-        intentIndex++;
+      function showAnswerFromSequence() {
+        const item = SEQUENCE[seqIndex % SEQUENCE.length];
+        seqIndex++;
+
+        if (item.type === "intent") {
+          const intent = intents.find(x => x.id === item.id) || intents[0];
+          panel.textContent = intent.answer;
+          return;
+        }
+
+        // protected / cultural
+        const meta = ANSWERS[item.id];
+        if (!meta) {
+          panel.textContent = "Tell me the exact phrase you’re looking at and I’ll expand it into plain race-day English — without guessing.";
+          return;
+        }
+
+        let text = meta.text(CONTEXT);
+
+        // Omitted cultural phrase (e.g. course venues) — skip quietly to next answer
+        if (!text) return showAnswerFromSequence();
+
+        // Apply repetition softening only where relevant
+        text = softenIfRepeated(item.id, text, meta);
+
+        panel.textContent = text;
       }
 
       function setState(next) {
@@ -203,11 +343,11 @@
 
         // answering
         status.textContent = "Answer";
-        showAnswer();
+        showAnswerFromSequence();
         btn.setAttribute("aria-pressed", "false");
       }
 
-     btn.addEventListener('click', () => {
+      btn.addEventListener('click', () => {
         if (state === "idle") return setState("listening");
         if (state === "listening") return setState("answering");
         return setState("listening");
