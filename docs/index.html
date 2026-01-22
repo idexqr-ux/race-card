@@ -91,6 +91,8 @@
 
 <body>
 
+  <div id="raceContext" aria-hidden="true">Race</div>
+
   <button id="askButton" type="button">
     <div>Ask</div>
     <div class="ask-sub">about the race card</div>
@@ -107,6 +109,14 @@
 </div>
 
   <script>
+const raceContext = document.getElementById('raceContext');
+const params = new URLSearchParams(window.location.search);
+const race = params.get('race');
+
+if (raceContext) {
+  raceContext.textContent = race ? `Race ${race}` : "Race";
+}
+
   (function () {
     const btn = document.getElementById('askBtn');
     const status = document.getElementById('statusLine');
