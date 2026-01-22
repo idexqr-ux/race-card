@@ -207,4 +207,16 @@
         btn.setAttribute("aria-pressed", "false");
       }
 
-      btn.addEventListe
+     btn.addEventListener('click', () => {
+        if (state === "idle") return setState("listening");
+        if (state === "listening") return setState("answering");
+        return setState("listening");
+      });
+
+      // start in idle
+      setState("idle");
+    })();
+  </script>
+
+</body>
+</html>
