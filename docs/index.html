@@ -101,8 +101,8 @@
   </div>
 
   <div class="back-link" onclick="goBackSmart()">
-  ← Back to race
-</div>
+    ← Back to race
+  </div>
 
   <script>
     // Race context (quiet label, future multi-race ready)
@@ -113,8 +113,18 @@
       raceContext.textContent = race ? `Race ${race}` : "Race";
     }
 
+    // Smart back: avoids returning to GitHub Pages settings when testing on laptop
+    function goBackSmart() {
+      if (window.history.length > 1) {
+        window.history.back();
+        return;
+      }
+      // Fallback stays within your GitHub Pages site
+      window.location.href = "./";
+    }
+
     (function () {
-      // Hook to your existing elements (IDs now match)
+      // Hook to your existing elements
       const btn = document.getElementById('askButton');
       const status = document.getElementById('statusLine');
       const panel = document.getElementById('answerText');
@@ -161,4 +171,40 @@
           label: "How to read the card",
           example: "What should I look at first?",
           answer:
-            "Most people start with the horse’s recent form, the going, and the race
+            "Most people start with the horse’s recent form, the going, and the race type. You don’t need to read everything — just enough to orient yourself before the race begins."
+        }
+      ];
+
+      let intentIndex = 0;
+      let state = "idle"; // idle | listening | answering
+
+      function showAnswer() {
+        const intent = intents[intentIndex % intents.length];
+        panel.textContent = intent.answer;
+        intentIndex++;
+      }
+
+      function setState(next) {
+        state = next;
+
+        if (state === "idle") {
+          status.textContent = "about the race card";
+          panel.innerHTML = "&nbsp;";
+          btn.setAttribute("aria-pressed", "false");
+          return;
+        }
+
+        if (state === "listening") {
+          status.textContent = "Listening…";
+          panel.textContent = "Say your question as you would to the person beside you.";
+          btn.setAttribute("aria-pressed", "true");
+          return;
+        }
+
+        // answering
+        status.textContent = "Answer";
+        showAnswer();
+        btn.setAttribute("aria-pressed", "false");
+      }
+
+      btn.addEventListe
