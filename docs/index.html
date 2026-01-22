@@ -106,5 +106,55 @@
   ← Back to race
 </div>
 
+  <script>
+  (function () {
+    const btn = document.getElementById('askBtn');
+    const status = document.getElementById('statusLine');
+    const panel = document.getElementById('answerPanel');
+
+    const answers = [
+      "Tell me the exact phrase you’re looking at and I’ll expand it into plain race-day English — without guessing.",
+      "If it’s a form comment, I can translate the shorthand into full meaning, staying factual.",
+      "If it’s a term (OR, novice, handicap, going), I’ll explain it in one calm paragraph.",
+      "If it’s colours, I’ll explain what they help you do — follow the right horse quickly and confidently."
+    ];
+
+    let i = 0;
+    let state = "idle"; // idle | listening | answering
+
+    function setState(next) {
+      state = next;
+
+      if (state === "idle") {
+        status.textContent = "about the race card";
+        panel.textContent = "";
+        btn.setAttribute("aria-pressed", "false");
+        return;
+      }
+
+      if (state === "listening") {
+        status.textContent = "Listening…";
+        panel.textContent = "Say your question as you would to the person beside you.";
+        btn.setAttribute("aria-pressed", "true");
+        return;
+      }
+
+      // answering
+      status.textContent = "Answer";
+      panel.textContent = answers[i % answers.length];
+      i++;
+      btn.setAttribute("aria-pressed", "false");
+    }
+
+    btn.addEventListener('click', () => {
+      if (state === "idle") return setState("listening");
+      if (state === "listening") return setState("answering");
+      return setState("listening");
+    });
+
+    setState("idle");
+  })();
+</script>
+
 </body>
 </html>
