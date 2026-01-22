@@ -65,23 +65,19 @@
       opacity: 0.85;
     }
 
-  .back-link {
-  display: inline-block;
-  margin-top: 14px;
+    .back-link {
+      display: inline-block;
+      margin-top: 14px;
 
-  font-size: 1.05em;      /* slightly clearer */
-  color: #6a6a6a;
+      font-size: 1.05em;      /* slightly clearer */
+      color: #6a6a6a;
 
-  padding: 12px 8px;      /* invisible finger comfort */
-  border-radius: 10px;
+      padding: 12px 8px;      /* invisible finger comfort */
+      border-radius: 10px;
 
-  cursor: pointer;
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
-}
-
-.back-link:hover {
-  color: #2b2b2b;
-}
+      cursor: pointer;
+      -webkit-tap-highlight-color: rgba(0,0,0,0);
+    }
 
     .back-link:hover {
       color: #2b2b2b;
@@ -93,78 +89,76 @@
 
   <div id="raceContext" aria-hidden="true">Race</div>
 
-  <button id="askButton" type="button">
+  <button id="askButton" type="button" aria-pressed="false">
     <div>Ask</div>
-    <div class="ask-sub">about the race card</div>
+    <div class="ask-sub" id="statusLine">about the race card</div>
   </button>
 
   <h1>The Race Card</h1>
 
   <div class="panel">
-    <p id="answerText">&nbsp;</p>
+    <p id="answerText" role="status" aria-live="polite">&nbsp;</p>
   </div>
 
   <div class="back-link" onclick="history.back()">
-  ← Back to race
-</div>
+    ← Back to race
+  </div>
 
   <script>
-const raceContext = document.getElementById('raceContext');
-const params = new URLSearchParams(window.location.search);
-const race = params.get('race');
-
-if (raceContext) {
-  raceContext.textContent = race ? `Race ${race}` : "Race";
-}
-
-  (function () {
-    const btn = document.getElementById('askBtn');
-    const status = document.getElementById('statusLine');
-    const panel = document.getElementById('answerPanel');
-
-    const answers = [
-      "Tell me the exact phrase you’re looking at and I’ll expand it into plain race-day English — without guessing.",
-      "If it’s a form comment, I can translate the shorthand into full meaning, staying factual.",
-      "If it’s a term (OR, novice, handicap, going), I’ll explain it in one calm paragraph.",
-      "If it’s colours, I’ll explain what they help you do — follow the right horse quickly and confidently."
-    ];
-
-    let i = 0;
-    let state = "idle"; // idle | listening | answering
-
-    function setState(next) {
-      state = next;
-
-      if (state === "idle") {
-        status.textContent = "about the race card";
-        panel.textContent = "";
-        btn.setAttribute("aria-pressed", "false");
-        return;
-      }
-
-      if (state === "listening") {
-        status.textContent = "Listening…";
-        panel.textContent = "Say your question as you would to the person beside you.";
-        btn.setAttribute("aria-pressed", "true");
-        return;
-      }
-
-      // answering
-      status.textContent = "Answer";
-      panel.textContent = answers[i % answers.length];
-      i++;
-      btn.setAttribute("aria-pressed", "false");
+    // Race context (quiet label, future multi-race ready)
+    const raceContext = document.getElementById('raceContext');
+    const params = new URLSearchParams(window.location.search);
+    const race = params.get('race');
+    if (raceContext) {
+      raceContext.textContent = race ? `Race ${race}` : "Race";
     }
 
-    btn.addEventListener('click', () => {
-      if (state === "idle") return setState("listening");
-      if (state === "listening") return setState("answering");
-      return setState("listening");
-    });
+    (function () {
+      // Hook to your existing elements (IDs now match)
+      const btn = document.getElementById('askButton');
+      const status = document.getElementById('statusLine');
+      const panel = document.getElementById('answerText');
 
-    setState("idle");
-  })();
-</script>
-
-</body>
-</html>
+      // Step 4: Intent cards (factual expansion, companion tone)
+      const intents = [
+        {
+          id: "form",
+          label: "Form comment",
+          example: "What does ‘ev ch til drvn & one pce 3 out’ mean?",
+          answer:
+            "This is shorthand describing how the horse travelled during the race. Expanded into plain English, it means the horse was always prominent, was being pushed along before the finish, and could only maintain one pace from three fences out."
+        },
+        {
+          id: "term",
+          label: "Racing term",
+          example: "What does OR mean?",
+          answer:
+            "OR stands for Official Rating. It’s a numerical assessment of a horse’s ability, used to help level the field in handicaps."
+        },
+        {
+          id: "going",
+          label: "Going / ground",
+          example: "Why does the going matter?",
+          answer:
+            "The going describes how firm or soft the ground is. Some horses perform best on soft ground, others on firmer ground, so it can significantly affect how a race unfolds."
+        },
+        {
+          id: "colours",
+          label: "Colours",
+          example: "What do the colours tell me?",
+          answer:
+            "The colours identify the owner and help you visually follow a horse during the race. They don’t affect performance, but they make tracking the right runner much easier."
+        },
+        {
+          id: "race-type",
+          label: "Race type",
+          example: "What’s a novice race?",
+          answer:
+            "A novice race is restricted to horses that have not won before a certain date or over a certain discipline, allowing less experienced horses to compete against similar rivals."
+        },
+        {
+          id: "how-to-read",
+          label: "How to read the card",
+          example: "What should I look at first?",
+          answer:
+            "Most people start with the horse’s recent form, the going, and the race
