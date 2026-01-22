@@ -65,13 +65,23 @@
       opacity: 0.85;
     }
 
-    .back-link {
-      display: inline-block;
-      margin-top: 14px;
-      font-size: 0.95em;
-      color: #6a6a6a;
-      cursor: pointer;
-    }
+  .back-link {
+  display: inline-block;
+  margin-top: 14px;
+
+  font-size: 1.05em;      /* slightly clearer */
+  color: #6a6a6a;
+
+  padding: 12px 8px;      /* invisible finger comfort */
+  border-radius: 10px;
+
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+.back-link:hover {
+  color: #2b2b2b;
+}
 
     .back-link:hover {
       color: #2b2b2b;
@@ -92,7 +102,9 @@
     <p id="answerText">&nbsp;</p>
   </div>
 
-  <div class="back-link">← Back to race</div>
+  <div class="back-link" onclick="history.back()">
+  ← Back to race
+</div>
 
 </body>
 </html>
