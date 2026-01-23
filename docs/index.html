@@ -465,7 +465,15 @@
         if (readAnswersAloud) speak(a);
       }
 
-      bindTap(askBtn, handleAsk);
+      function bindTap(el, handler) {
+  if (!el) return;
+
+  // The universal, safest event
+  el.addEventListener("click", handler);
+
+  // iOS Safari helper: allow taps that sometimes skip click
+  el.addEventListener("touchend", handler, { passive: true });
+}
 
       bindTap(clearBtn, () => {
         q.value = "";
