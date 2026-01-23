@@ -361,6 +361,73 @@
           panel.textContent = "Tell me the exact phrase you’re looking at and I’ll expand it into plain race-day English — without guessing.";
           return;
         }
+              // --- Voice (mocked) : progressive enhancement, no UI change ---
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const voiceSupported = !!SpeechRecognition;
+
+      function listenOnce() {
+        return new Promise((resolve, reject) => {
+          if (!voiceSupported) return reject(new Error("Voice not supported"));
+
+          const rec = new SpeechRecognition();
+          rec.lang = "en-GB";
+          rec.interimResults = false;
+          rec.maxAlternatives = 1;
+
+          rec.onresult = (e) => {
+            const text = e.results?.[0]?.[0]?.transcript || "";
+            resolve(String(text).trim());
+          };
+
+          rec.onerror = (e) => reject(e);
+
+          try { rec.start(); } catch (err) { reject(err); }
+        });
+      }
+
+      // Very small, safe router from spoken words → one protected answer
+      function chooseByVoice(q) {
+        const t = String(q || "").toLowerCase();
+
+        // essentials first
+        if (t.includes("loo") || t.includes("toilet") || t.includes("bathroom")) return { type: "protected", id: "loo" };
+        if (t.includes("exit") || t.includes("get out") || t.includes("car park") || t.includes("parking") || t.includes("satnav")) return { type: "protected", id: "carpark_entrance" };
+        if (t.includes("coffee") || t.includes("burger") || t.includes("food")) return { type: "protected", id: "food" };
+        if (t.includes("mind your backs")) return { type: "cultural", id: "mind_your_backs" };
+
+        // otherwise: use your existing calm sequence
+        return null;
+      }
+
+      function showById(item) {
+        if (!item) return showAnswerFromSequence();
+
+        if (item.type === "intent") {
+          setReinforce(null);
+          const intent = intents.find(x => x.id === item.id) || intents[0];
+          panel.textContent = intent.answer;
+          return;
+        }
+
+        const meta = ANSWERS[item.id];
+        if (!meta) {
+          setReinforce(null);
+          panel.textContent = "Tell me the exact phrase you’re looking at and I’ll expand it into plain race-day English — without guessing.";
+          return;
+        }
+
+        let text = meta.text(CONTEXT);
+        if (!text) return showAnswerFromSequence();
+
+        text = softenIfRepeated(item.id, text, meta);
+
+        if (item.id === "loo") setReinforce("LOOS");
+        else if (item.id === "carpark_entrance") setReinforce("EXIT");
+        else if (item.id === "mind_your_backs") setReinforce("MIND YOUR BACKS", true);
+        else setReinforce(null);
+
+        panel.textContent = text;
+      }
 
         let text = meta.text(CONTEXT);
         if (!text) return showAnswerFromSequence();
@@ -400,7 +467,33 @@
         btn.setAttribute("aria-pressed", "false");
       }
 
-      btn.addEventListener('click', () => {
+            btn.addEventListener('click', async () => {
+        // If voice is supported, use it (mocked voice input)
+        if (voiceSupported) {
+          setState("listening");
+
+          try {
+            const q = await listenOnce();
+
+            // If nothing heard, fall back gently to sequence
+            if (!q) {
+              status.textContent = "Answer";
+              showAnswerFromSequence();
+              btn.setAttribute("aria-pressed", "false");
+              return;
+            }
+
+            const chosen = chooseByVoice(q);
+            status.textContent = "Answer";
+            showById(chosen);
+            btn.setAttribute("aria-pressed", "false");
+            return;
+          } catch (e) {
+            // Voice failed (or permission denied) — fall back quietly
+          }
+        }
+
+        // No voice (or voice failed): keep your existing scaffold
         if (state === "idle") return setState("listening");
         if (state === "listening") return setState("answering");
         return setState("listening");
