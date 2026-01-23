@@ -329,6 +329,7 @@
         const u = new SpeechSynthesisUtterance(text);
         u.rate = 0.95;
         u.pitch = 1.0;
+        u.volume = 0.85;
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(u);
       }
