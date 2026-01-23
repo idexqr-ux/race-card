@@ -295,32 +295,34 @@
         u.pitch = 1.0;
         u.volume = 0.85;
         window.speechSynthesis.speak(u);
-        function bleep(freq = 880, duration = 0.08, volume = 0.03) {
-  try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
+      }
 
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
+      // Tiny “connected / captured” bleep
+      function bleep(freq = 880, duration = 0.08, volume = 0.03) {
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return;
+          const ctx = new AudioCtx();
 
-    o.type = "sine";
-    o.frequency.value = freq;
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
 
-    g.gain.value = volume;
+          o.type = "sine";
+          o.frequency.value = freq;
+          g.gain.value = volume;
 
-    o.connect(g);
-    g.connect(ctx.destination);
+          o.connect(g);
+          g.connect(ctx.destination);
 
-    o.start();
-    setTimeout(() => {
-      o.stop();
-      ctx.close();
-    }, duration * 1000);
-  } catch (e) {
-    // ignore if blocked
-  }
-}
+          o.start();
+          setTimeout(() => {
+            o.stop();
+            ctx.close();
+          }, duration * 1000);
+        } catch (e) {
+          // ignore if blocked
+        }
+      }
 
       // Polite: touching cancels speech
       document.addEventListener("touchstart", () => {
@@ -380,7 +382,6 @@
         if (!question) {
           answerText.textContent = "Type a question first (or use iPad dictation in the box).";
           answerHint.textContent = "Try: “Who is riding…?” or “What does … mean?”";
-          // Only speak prompts if user opted into audio
           if (readAnswersAloud) speak("Please type a question first.");
           return;
         }
@@ -390,9 +391,8 @@
         if (readAnswersAloud) speak(a);
       }
 
-      // Ask button (iPad-safe)
+      // Ask button (simple & reliable)
       askBtn.addEventListener("click", handleAsk);
-      askBtn.addEventListener("touchend", handleAsk, { passive: true });
 
       // Enter submits (iPad: Shift+Enter = new line)
       q.addEventListener("keydown", (e) => {
@@ -420,51 +420,61 @@
 
       function startListening() {
         if (!SpeechRecognition) {
-  setListeningUI(true, "iPad: tap the box, then use the keyboard mic.");
-  micBtn.textContent = "🎙️ Dictation (iPad)";
-  q.focus();
-  q.scrollIntoView({ behavior: "smooth", block: "center" });
+          setListeningUI(true, "iPad: tap the box, then use the keyboard mic.");
+          micBtn.textContent = "🎙️ Dictation (iPad)";
+          q.focus();
+          q.scrollIntoView({ behavior: "smooth", block: "center" });
 
-  if (!q.value.trim()) {
-    q.value = "Use the keyboard mic to dictate your question…";
-  }
+          if (!q.value.trim()) {
+            q.value = "Use the keyboard mic to dictate your question…";
+          }
 
-  setTimeout(() => {
-    setListeningUI(false);
-    micBtn.textContent = "🎙️ Voice";
-  }, 2200);
-  return;
-}
+          setTimeout(() => {
+            setListeningUI(false);
+            micBtn.textContent = "🎙️ Voice";
+          }, 2200);
+          return;
+        }
 
         if (!recognizer) {
           recognizer = new SpeechRecognition();
-          bleep(880);
           recognizer.lang = "en-GB";
           recognizer.interimResults = true;
           recognizer.continuous = false;
 
-          recognizer.onstart = () => { isListening = true; setListeningUI(true, "Listening…"); };
+          recognizer.onstart = () => {
+            isListening = true;
+            bleep(880); // connected
+            setListeningUI(true, "Listening…");
+          };
+
           recognizer.onerror = () => {
             isListening = false;
-            bleep(880); // “connected”
             setListeningUI(true, "Couldn’t hear that — try again.");
             setTimeout(() => setListeningUI(false), 1600);
           };
-          recognizer.onend = () => { isListening = false; setListeningUI(false); };
+
+          recognizer.onend = () => {
+            isListening = false;
+            setListeningUI(false);
+          };
 
           recognizer.onresult = (event) => {
             let finalText = "";
             let interimText = "";
+
             for (let i = event.resultIndex; i < event.results.length; i++) {
               const res = event.results[i];
               const txt = res[0].transcript;
               if (res.isFinal) finalText += txt;
-              if (finalText) bleep(660, 0.07); // “captured”
               else interimText += txt;
             }
+
             q.value = (finalText || interimText).trim();
             q.focus();
+
             if (finalText) {
+              bleep(660, 0.07); // captured
               setListeningUI(true, "Captured. Tap Ask when ready.");
               setTimeout(() => setListeningUI(false), 1400);
             }
