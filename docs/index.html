@@ -167,8 +167,8 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       font-size: 0.95rem;
       transition: transform 0.04s ease;
-      -webkit-tap-highlight-color: transparent; /* iOS tap calmness */
-      touch-action: manipulation;               /* helps Safari treat as a tap */
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
     .btn:active{ transform: translateY(1px); }
 
@@ -214,7 +214,6 @@
       margin-top: 8px;
     }
 
-    /* Tiny footer note */
     footer{
       color: var(--soft);
       font-size: 0.85rem;
@@ -222,7 +221,6 @@
       text-align: center;
     }
 
-    /* Accessibility helper */
     .sr-only{
       position: absolute;
       width: 1px;
@@ -290,6 +288,14 @@
           <button class="btn subtle" id="readBtn" aria-label="Read the guidance aloud" type="button">🔊 Read this aloud</button>
           <button class="btn subtle" id="clearBtn" aria-label="Clear the question" type="button">Clear</button>
         </div>
+
+        <!-- NEW: Read answers aloud toggle -->
+        <div class="row" style="margin-top:6px;">
+          <button class="btn subtle" id="readAnswerToggle" type="button" aria-pressed="false">
+            🔈 Read answers aloud: Off
+          </button>
+          <div></div>
+        </div>
       </div>
 
       <div class="answer" aria-live="polite" aria-label="Answer area">
@@ -307,13 +313,8 @@
   </main>
 
   <script>
-    // iPad/Safari safe: wait for DOM, then attach handlers
     document.addEventListener("DOMContentLoaded", () => {
 
-      // ------------------------------------------------------------
-      // 1) Calm orientation (can be filled from URL params / QR later)
-      // Example: ask.html?mode=Showing&card=Catalogue&focus=Ring%202
-      // ------------------------------------------------------------
       const params = new URLSearchParams(location.search);
       const mode = params.get("mode") || "Racing";
       const card = params.get("card") || "Gate Card";
@@ -323,24 +324,17 @@
       document.getElementById("cardValue").textContent = card;
       document.getElementById("focusValue").textContent = focus;
 
-      // ------------------------------------------------------------
-      // 2) Audio-first: gentle read-aloud (works if browser allows)
-      // ------------------------------------------------------------
       function speak(text) {
         if (!("speechSynthesis" in window)) return;
         const u = new SpeechSynthesisUtterance(text);
-        u.rate = 0.95;     // slightly slower = calmer
+        u.rate = 0.95;
         u.pitch = 1.0;
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(u);
       }
 
-      // ------------------------------------------------------------
-      // Helpers: iPad reliable tap binding (click + touchend + pointerup)
-      // ------------------------------------------------------------
       function bindTap(el, handler) {
         if (!el) return;
-
         el.addEventListener("click", handler);
 
         el.addEventListener("touchend", (e) => {
@@ -354,9 +348,9 @@
         });
       }
 
-      // Elements
       const q = document.getElementById("q");
       q.focus();
+
       const askBtn = document.getElementById("askBtn");
       const micBtn = document.getElementById("micBtn");
       const readBtn = document.getElementById("readBtn");
@@ -365,14 +359,31 @@
       const answerText = document.getElementById("answerText");
       const answerHint = document.getElementById("answerHint");
 
-      // Read aloud
+      // Guidance read aloud
       bindTap(readBtn, () => {
         speak(`You are on the Ask page for ${mode}. Card: ${card}. Focus: ${focus}. Ask one clear question at a time.`);
       });
 
-      // ------------------------------------------------------------
-      // 3) Mocked voice input (future voice hook)
-      // ------------------------------------------------------------
+      // NEW: Read answers aloud toggle (remembered)
+      const readAnswerToggle = document.getElementById("readAnswerToggle");
+      let readAnswersAloud = localStorage.getItem("readAnswersAloud") === "true";
+
+      function updateReadToggle() {
+        readAnswerToggle.textContent = readAnswersAloud
+          ? "🔊 Read answers aloud: On"
+          : "🔈 Read answers aloud: Off";
+        readAnswerToggle.setAttribute("aria-pressed", readAnswersAloud);
+      }
+      updateReadToggle();
+
+      bindTap(readAnswerToggle, () => {
+        readAnswersAloud = !readAnswersAloud;
+        localStorage.setItem("readAnswersAloud", readAnswersAloud);
+        updateReadToggle();
+        if (readAnswersAloud) speak("Answers will now be read aloud.");
+      });
+
+      // Mock voice input
       bindTap(micBtn, () => {
         const samples = [
           "Who is riding Houla Cove?",
@@ -381,14 +392,10 @@
           "For showing: what does 'reserve champion' mean here?",
           "Which horse is Irish-bred in this race?"
         ];
-        const pick = samples[Math.floor(Math.random() * samples.length)];
-        q.value = pick;
+        q.value = samples[Math.floor(Math.random() * samples.length)];
         speak("Captured. Tap Ask when ready.");
       });
 
-      // ------------------------------------------------------------
-      // 4) Q&A placeholder
-      // ------------------------------------------------------------
       function mockAnswer(question) {
         const normalized = question.toLowerCase();
 
@@ -415,15 +422,17 @@
           speak("Please type a question first.");
           return;
         }
+
         const a = mockAnswer(question);
         answerText.textContent = a;
         answerHint.textContent = "If you want it shorter, ask: “Answer in one line.”";
+
+        // NEW: speak answer if opted in
+        if (readAnswersAloud) speak(a);
       }
 
-      // Ask button (fixed for iPad)
       bindTap(askBtn, handleAsk);
 
-      // Clear
       bindTap(clearBtn, () => {
         q.value = "";
         q.focus();
@@ -431,15 +440,15 @@
         answerHint.textContent = "Tip: “What does X mean?” is a brilliant format for racing abbreviations.";
       });
 
-      // Keyboard: Ctrl/Cmd + Enter to ask (desktop)
-     q.addEventListener("keydown", (e) => {
-  // iPad: Enter submits, Shift+Enter makes a new line
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    handleAsk();
-  }
-});
+      // iPad: Enter submits, Shift+Enter new line
+      q.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          handleAsk();
+        }
+      });
 
+    });
   </script>
 </body>
 </html>
