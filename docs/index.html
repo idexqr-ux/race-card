@@ -363,9 +363,103 @@ document.addEventListener("touchstart", () => {
       const answerHint = document.getElementById("answerHint");
 
       // Guidance read aloud
-      bindTap(readBtn, () => {
-        speak(`You are on the Ask page for ${mode}. Card: ${card}. Focus: ${focus}. Ask one clear question at a time.`);
-      });
+      // ------------------------------------------------------------
+// Real speech input (when supported) + calm fallback (iPad)
+// ------------------------------------------------------------
+const listenChips = document.getElementById("listenChips");
+const listenStatus = document.getElementById("listenStatus");
+
+// Feature detect
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+
+let recognizer = null;
+let isListening = false;
+
+function setListeningUI(on, message) {
+  if (on) {
+    listenChips.style.display = "flex";
+    listenStatus.textContent = message || "Listening…";
+  } else {
+    listenChips.style.display = "none";
+  }
+}
+
+function startListening() {
+  if (!SpeechRecognition) {
+    // iPad/Safari fallback: use built-in dictation
+    setListeningUI(true, "Speech input not supported here — use iPad dictation.");
+    // Put cursor in the box so the keyboard mic is one tap away
+    q.focus();
+    // Speak gently (optional)
+    speak("Speech input isn't supported in this browser. Use the keyboard dictation mic.");
+    // Hide after a moment
+    setTimeout(() => setListeningUI(false), 2500);
+    return;
+  }
+
+  if (!recognizer) {
+    recognizer = new SpeechRecognition();
+    recognizer.lang = "en-GB";
+    recognizer.interimResults = true;   // show partial words as they come
+    recognizer.continuous = false;      // one question at a time (calm)
+
+    recognizer.onstart = () => {
+      isListening = true;
+      setListeningUI(true, "Listening…");
+    };
+
+    recognizer.onerror = (e) => {
+      isListening = false;
+      setListeningUI(true, "Couldn’t hear that — try again.");
+      // Common errors: "not-allowed", "no-speech", "audio-capture"
+      setTimeout(() => setListeningUI(false), 1800);
+    };
+
+    recognizer.onend = () => {
+      isListening = false;
+      setListeningUI(false);
+    };
+
+    recognizer.onresult = (event) => {
+      // Build transcript (final + interim)
+      let finalText = "";
+      let interimText = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const res = event.results[i];
+        const txt = res[0].transcript;
+        if (res.isFinal) finalText += txt;
+        else interimText += txt;
+      }
+
+      // Put text into the box (don’t auto-submit)
+      q.value = (finalText || interimText).trim();
+
+      // Whisper reinforcement
+      if (finalText) setListeningUI(true, "Captured. Tap Ask when ready.");
+    };
+  }
+
+  // Start
+  try {
+    recognizer.start();
+  } catch (err) {
+    // Some browsers throw if already started
+  }
+}
+
+function stopListening() {
+  if (recognizer && isListening) {
+    recognizer.stop();
+  }
+}
+
+// Mic button: tap toggles listening
+bindTap(micBtn, () => {
+  if (isListening) stopListening();
+  else startListening();
+});
 
       // NEW: Read answers aloud toggle (remembered)
       const readAnswerToggle = document.getElementById("readAnswerToggle");
