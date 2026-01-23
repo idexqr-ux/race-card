@@ -383,6 +383,12 @@ function setListeningUI(on, message) {
   } else {
     listenChips.style.display = "none";
   }
+
+  micBtn.textContent = on ? "⏹ Stop listening" : "🎙️ Voice";
+
+  if (!on && "speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
 }
 
 function startListening() {
