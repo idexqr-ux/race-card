@@ -60,6 +60,28 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
 
+    /* Reinforced phrase (visual whisper): recognition only, never dominates */
+    .reinforce {
+      display: inline-block;
+      margin: 0 0 10px 0;
+
+      font-family: inherit;
+      font-size: 0.92em;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+
+      color: #6a6a6a;
+      opacity: 0.9;
+
+      user-select: none;
+    }
+
+    /* Safety reinforcement: allowed to be a touch firmer */
+    .reinforce--safety {
+      color: #4f4f4f;
+      opacity: 1;
+    }
+
     #answerText {
       min-height: 3em;
       opacity: 0.85;
@@ -107,6 +129,8 @@
   <h1>The Race Card</h1>
 
   <div class="panel">
+    <!-- visual whisper label (kept out of screen readers) -->
+    <div id="reinforceLabel" class="reinforce" aria-hidden="true"></div>
     <p id="answerText" role="status" aria-live="polite">&nbsp;</p>
   </div>
 
@@ -126,23 +150,11 @@
     }
 
     // --- Quiet context from QR (never shown to user) ---
-    // Venue context:
-    //   venue=ptp    (shared space, cultural phrases may appear)
-    //   venue=course (purpose-built, fenced routes; cultural phrases omitted)
-    //   venue=show   (showground context)
     const venue = (params.get('venue') || 'ptp').toLowerCase();   // ptp | course | show
-
-    // Optional sizing context for when maps ever surface
     const scale = (params.get('scale') || '').toLowerCase();      // small | medium | large (optional)
-
-    // Optional area context (e.g. shetland) — future use
     const area = (params.get('area') || '').toLowerCase();        // shetland | natives | main (optional)
-
-    // Landmark label (only swaps nouns; keeps tone stable)
-    // Examples: landmark=shopping%20village | trade%20stands | retail%20village | main%20concourse
     const landmark = params.get('landmark') || 'the busiest part of the course';
 
-    // Smart back: avoids returning to GitHub Pages settings when testing on laptop
     function goBackSmart() {
       if (window.history.length > 1) {
         window.history.back();
@@ -151,7 +163,6 @@
       window.location.href = "./";
     }
 
-    // --- session-only repetition counter (no identity, no tracking across sessions) ---
     function bumpAsked(id) {
       const key = `asked_${id}`;
       const n = Number(sessionStorage.getItem(key) || "0") + 1;
@@ -159,13 +170,11 @@
       return n;
     }
 
-    // Optional: formalises your “maps are conditional tools” rule (not used yet)
     function mapAllowed(moment) {
       if (scale !== 'medium' && scale !== 'large') return false;
       return (moment === 'ring_disambiguation' || moment === 'after_the_bell' || moment === 'leaving');
     }
 
-    // Optional: quiet moment inference stub (not used yet)
     function inferMomentFromText(q = "") {
       const t = String(q).toLowerCase();
 
@@ -175,16 +184,27 @@
       if (t.includes("a or b") || t.includes("which side") || t.includes("this side") || t.includes("mini") || t.includes("standard")) return "ring_disambiguation";
       if (t.includes("where is ring") || t.includes("where is the ring")) return "class_finding";
 
-      return "settling_in"; // safe default: calm and non-instructive
+      return "settling_in";
     }
 
     (function () {
-      // Hook to your existing elements
       const btn = document.getElementById('askButton');
       const status = document.getElementById('statusLine');
       const panel = document.getElementById('answerText');
 
-      // --- Protected / contextual answer library (Option 3 alignment) ---
+      // NEW: reinforcement hook
+      const reinforce = document.getElementById('reinforceLabel');
+
+      function setReinforce(text, safety = false) {
+        if (!text) {
+          reinforce.textContent = "";
+          reinforce.classList.remove('reinforce--safety');
+          return;
+        }
+        reinforce.textContent = text;
+        reinforce.classList.toggle('reinforce--safety', safety);
+      }
+
       const ANSWERS = {
         loo: {
           kind: "protected",
@@ -193,7 +213,6 @@
             if (venue === "ptp") {
               return `You’re not the only one to ask — it’s good to know early. At point-to-points the loos are usually portable and set up in a few different spots. If you head towards the ${landmark} or the busiest part of the course, you’ll usually find one nearby, with signs once you’re close.`;
             }
-            // purpose-built course
             return `You’re not the only one to ask — it’s good to know early. The nearest loos are usually just off the main concourse, close to the parade ring. There are signs once you’re close, and it’s worth noting there’s often another set a little further round if the nearest ones are busy later on.`;
           }
         },
@@ -219,7 +238,6 @@
         first_race_time: {
           kind: "protected",
           tags: ["timing", "arrival", "medium"],
-          // Placeholder by design — you’ll later feed this from the gate card / schedule
           text: () =>
             `The first race is usually at [time]. You’ve got a bit of breathing space before it starts — enough time to get your bearings and enjoy the build-up.`
         },
@@ -227,7 +245,6 @@
         num_races: {
           kind: "protected",
           tags: ["timing", "planning", "medium"],
-          // Placeholder by design — you’ll later feed this from the gate card / schedule
           text: () =>
             `There are usually [number] races on the card today. It’s a helpful one to know on arrival, especially if you’re planning to leave before the final queues build up.`
         },
@@ -236,20 +253,18 @@
           kind: "cultural",
           tags: ["ptp_only", "cultural"],
           text: ({ venue }) => {
-            if (venue !== "ptp") return ""; // omit entirely at purpose-built venues
+            if (venue !== "ptp") return "";
             return `You may hear “mind your backs, please” — it’s a polite way of saying there’s a horse coming through behind you, so on hearing it, it’s best to step aside.`;
           }
         }
       };
 
-      // Repetition softening: stays consistent, becomes more direct, never says “as I said earlier”
       function softenIfRepeated(answerId, text, meta) {
         const askedCount = bumpAsked(answerId);
         const isOrientation = meta?.tags?.includes("orientation");
 
         if (!isOrientation || askedCount <= 1) return text;
 
-        // Shorter, movement-first variants
         if (answerId === "loo") {
           if (venue === "ptp") {
             return `Loos are usually near the ${landmark} or the main gathering areas. Head towards the busiest part of the course — the signs will guide you once you’re close.`;
@@ -264,7 +279,6 @@
         return text;
       }
 
-      // --- Your existing “intent cards” retained ---
       const intents = [
         {
           id: "form",
@@ -310,11 +324,8 @@
         }
       ];
 
-      // Context object for templating answers (quiet QR context included)
       const CONTEXT = { venue, scale, area, landmark, race };
 
-      // Sequence: mixes your intent cards with protected/cultural items.
-      // This is temporary until real question selection exists.
       const SEQUENCE = [
         { type: "intent", id: "how-to-read" },
         { type: "protected", id: "first_race_time" },
@@ -331,32 +342,36 @@
       ];
 
       let seqIndex = 0;
-      let state = "idle"; // idle | listening | answering
+      let state = "idle";
 
       function showAnswerFromSequence() {
         const item = SEQUENCE[seqIndex % SEQUENCE.length];
         seqIndex++;
 
         if (item.type === "intent") {
+          setReinforce(null);
           const intent = intents.find(x => x.id === item.id) || intents[0];
           panel.textContent = intent.answer;
           return;
         }
 
-        // protected / cultural
         const meta = ANSWERS[item.id];
         if (!meta) {
+          setReinforce(null);
           panel.textContent = "Tell me the exact phrase you’re looking at and I’ll expand it into plain race-day English — without guessing.";
           return;
         }
 
         let text = meta.text(CONTEXT);
-
-        // Omitted cultural phrase (e.g. course venues) — skip quietly to next answer
         if (!text) return showAnswerFromSequence();
 
-        // Apply repetition softening only where relevant
         text = softenIfRepeated(item.id, text, meta);
+
+        // Visual reinforcement (quiet anchors only)
+        if (item.id === "loo") setReinforce("LOOS");
+        else if (item.id === "carpark_entrance") setReinforce("EXIT");
+        else if (item.id === "mind_your_backs") setReinforce("MIND YOUR BACKS", true);
+        else setReinforce(null);
 
         panel.textContent = text;
       }
@@ -367,6 +382,7 @@
         if (state === "idle") {
           status.textContent = "about the race card";
           panel.innerHTML = "&nbsp;";
+          setReinforce(null);
           btn.setAttribute("aria-pressed", "false");
           return;
         }
@@ -374,11 +390,11 @@
         if (state === "listening") {
           status.textContent = "Listening…";
           panel.textContent = "Say your question as you would to the person beside you.";
+          setReinforce(null);
           btn.setAttribute("aria-pressed", "true");
           return;
         }
 
-        // answering
         status.textContent = "Answer";
         showAnswerFromSequence();
         btn.setAttribute("aria-pressed", "false");
@@ -390,7 +406,6 @@
         return setState("listening");
       });
 
-      // start in idle
       setState("idle");
     })();
   </script>
