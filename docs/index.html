@@ -325,23 +325,21 @@
       document.getElementById("focusValue").textContent = focus;
 
       function speak(text) {
-        if (!("speechSynthesis" in window)) return;
-        const u = new SpeechSynthesisUtterance(text);
-        u.rate = 0.95;
-        u.pitch = 1.0;
-        u.volume = 0.85;
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(u);
-      }
+  if (!("speechSynthesis" in window)) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.95;
+  u.pitch = 1.0;
+  u.volume = 0.85;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+}
 
-      function bindTap(el, handler) {
-        if (!el) return;
-        el.addEventListener("click", handler);
-
-        el.addEventListener("touchend", (e) => {
-          e.preventDefault();
-          handler(e);
-        }, { passive: false });
+// Polite behaviour: stop speaking if the user touches the screen again
+document.addEventListener("touchstart", () => {
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+}, { passive: true });
 
         el.addEventListener("pointerup", (e) => {
           e.preventDefault();
