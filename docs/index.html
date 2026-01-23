@@ -413,6 +413,8 @@
             }
 
             q.value = (finalText || interimText).trim();
+            q.focus();
+    q.setSelectionRange(q.value.length, q.value.length);
 
             if (finalText) setListeningUI(true, "Captured. Tap Ask when ready.");
           };
