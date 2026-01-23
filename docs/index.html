@@ -461,7 +461,7 @@
         if (!question) {
           answerText.textContent = "Type a question first (or tap Voice).";
           answerHint.textContent = "Try: “Who is riding…?” or “What does … mean?”";
-          speak("Please type a question first.");
+          if (readAnswersAloud) speak("Please type a question first.");
           return;
         }
 
