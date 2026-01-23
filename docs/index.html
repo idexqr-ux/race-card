@@ -13,7 +13,6 @@
       --card: #ffffff;
       --line: #e3e1db;
 
-      /* calm accents */
       --celadon: #c9d5d0;
       --celadon-ink: #2e3b37;
       --mist: #d9dee1;
@@ -32,14 +31,9 @@
       padding: 16px;
     }
 
-    .wrap{
-      max-width: 560px;
-      margin: 0 auto;
-    }
+    .wrap{ max-width: 560px; margin: 0 auto; }
 
-    header{
-      margin: 12px 0 14px 0;
-    }
+    header{ margin: 12px 0 14px 0; }
 
     h1{
       font-size: 1.25rem;
@@ -47,11 +41,7 @@
       letter-spacing: 0.2px;
     }
 
-    .sub{
-      color: var(--soft);
-      font-size: 0.95rem;
-      margin: 0;
-    }
+    .sub{ color: var(--soft); font-size: 0.95rem; margin: 0; }
 
     .panel{
       background: var(--card);
@@ -62,7 +52,6 @@
       margin: 14px 0;
     }
 
-    /* Whisper chips (reinforcement, not shouting) */
     .chips{
       display: flex;
       flex-wrap: wrap;
@@ -90,27 +79,16 @@
       border-color: rgba(243,240,199,0.95);
     }
 
-    /* Orientation block */
-    .context{
-      display: grid;
-      gap: 8px;
-    }
+    .context{ display: grid; gap: 8px; }
     .contextRow{
       display:flex;
       justify-content: space-between;
       gap: 10px;
       align-items: baseline;
     }
-    .label{
-      color: var(--soft);
-      font-size: 0.9rem;
-    }
-    .value{
-      font-weight: 600;
-      font-size: 0.98rem;
-    }
+    .label{ color: var(--soft); font-size: 0.9rem; }
+    .value{ font-weight: 600; font-size: 0.98rem; }
 
-    /* Protected wording: guidance text is intentionally non-selectable */
     .guide{
       user-select: none;
       -webkit-user-select: none;
@@ -121,23 +99,10 @@
       border-radius: 14px;
       margin-top: 12px;
     }
-    .guide p{
-      margin: 0 0 10px 0;
-      color: #31413b;
-      font-size: 0.98rem;
-    }
+    .guide p{ margin: 0 0 10px 0; color: #31413b; font-size: 0.98rem; }
     .guide p:last-child{ margin:0; }
 
-    /* Ask input */
-    .askArea{
-      display: grid;
-      gap: 10px;
-      margin-top: 12px;
-      <div class="chips" id="listenChips" style="display:none;">
-  <div class="chip mist" id="listenStatus">Listening…</div>
-</div>
-
-    }
+    .askArea{ display: grid; gap: 10px; margin-top: 12px; }
 
     textarea{
       width: 100%;
@@ -156,7 +121,6 @@
       box-shadow: 0 0 0 4px rgba(201,213,208,0.25);
     }
 
-    /* Buttons */
     .row{
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -182,29 +146,21 @@
       color: #23312c;
       font-weight: 650;
     }
-
     .btn.voice{
       border-color: rgba(217,222,225,0.95);
       background: rgba(217,222,225,0.35);
       color: #22303a;
       font-weight: 650;
     }
+    .btn.subtle{ background: #fff; color: #2b2b2b; }
 
-    .btn.subtle{
-      background: #fff;
-      color: #2b2b2b;
-    }
-
-    /* Output */
     .answer{
       margin-top: 12px;
       border-top: 1px solid var(--line);
       padding-top: 12px;
     }
-    .answer h2{
-      font-size: 1.05rem;
-      margin: 0 0 8px 0;
-    }
+    .answer h2{ font-size: 1.05rem; margin: 0 0 8px 0; }
+
     .answerBox{
       background: #fbfbfa;
       border: 1px solid var(--line);
@@ -212,11 +168,7 @@
       padding: 12px;
       font-family: Georgia, "Times New Roman", Times, serif;
     }
-    .answerBox .hint{
-      color: var(--soft);
-      font-size: 0.95rem;
-      margin-top: 8px;
-    }
+    .answerBox .hint{ color: var(--soft); font-size: 0.95rem; margin-top: 8px; }
 
     footer{
       color: var(--soft);
@@ -284,16 +236,21 @@
         <textarea id="q" placeholder="Ask a question… (e.g. “Who is riding Houla Cove?” or “Explain ‘ev ch til drvn’”)"></textarea>
 
         <div class="row">
-          <button class="btn primary" id="askBtn" aria-label="Ask the question" type="button">Ask</button>
-          <button class="btn voice" id="micBtn" aria-label="Voice input (mock for now)" type="button">🎙️ Voice (mock)</button>
+          <button class="btn primary" id="askBtn" type="button">Ask</button>
+          <button class="btn voice" id="micBtn" type="button">🎙️ Voice</button>
         </div>
 
         <div class="row">
-          <button class="btn subtle" id="readBtn" aria-label="Read the guidance aloud" type="button">🔊 Read this aloud</button>
-          <button class="btn subtle" id="clearBtn" aria-label="Clear the question" type="button">Clear</button>
+          <button class="btn subtle" id="readBtn" type="button">🔊 Read this aloud</button>
+          <button class="btn subtle" id="clearBtn" type="button">Clear</button>
         </div>
 
-        <!-- NEW: Read answers aloud toggle -->
+        <!-- Listening whisper -->
+        <div class="chips" id="listenChips" style="display:none;">
+          <div class="chip mist" id="listenStatus">Listening…</div>
+        </div>
+
+        <!-- Read answers aloud toggle -->
         <div class="row" style="margin-top:6px;">
           <button class="btn subtle" id="readAnswerToggle" type="button" aria-pressed="false">
             🔈 Read answers aloud: Off
@@ -319,6 +276,7 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
 
+      // Orientation
       const params = new URLSearchParams(location.search);
       const mode = params.get("mode") || "Racing";
       const card = params.get("card") || "Gate Card";
@@ -328,29 +286,37 @@
       document.getElementById("cardValue").textContent = card;
       document.getElementById("focusValue").textContent = focus;
 
+      // Speak (output)
       function speak(text) {
-  if (!("speechSynthesis" in window)) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = 0.95;
-  u.pitch = 1.0;
-  u.volume = 0.85;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(u);
-}
+        if (!("speechSynthesis" in window)) return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.95;
+        u.pitch = 1.0;
+        u.volume = 0.85;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+      }
 
-// Polite behaviour: stop speaking if the user touches the screen again
-document.addEventListener("touchstart", () => {
-  if ("speechSynthesis" in window) {
-    window.speechSynthesis.cancel();
-  }
-}, { passive: true });
+      // Polite: stop speaking when user touches screen
+      document.addEventListener("touchstart", () => {
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      }, { passive: true });
 
+      // Tap helper (iPad safe)
+      function bindTap(el, handler) {
+        if (!el) return;
+        el.addEventListener("click", handler);
+        el.addEventListener("touchend", (e) => {
+          e.preventDefault();
+          handler(e);
+        }, { passive: false });
         el.addEventListener("pointerup", (e) => {
           e.preventDefault();
           handler(e);
         });
       }
 
+      // Elements
       const q = document.getElementById("q");
       q.focus();
 
@@ -363,111 +329,11 @@ document.addEventListener("touchstart", () => {
       const answerHint = document.getElementById("answerHint");
 
       // Guidance read aloud
-      // ------------------------------------------------------------
-// Real speech input (when supported) + calm fallback (iPad)
-// ------------------------------------------------------------
-const listenChips = document.getElementById("listenChips");
-const listenStatus = document.getElementById("listenStatus");
+      bindTap(readBtn, () => {
+        speak(`You are on the Ask page for ${mode}. Card: ${card}. Focus: ${focus}. Ask one clear question at a time.`);
+      });
 
-// Feature detect
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
-
-let recognizer = null;
-let isListening = false;
-
-function setListeningUI(on, message) {
-  if (on) {
-    listenChips.style.display = "flex";
-    listenStatus.textContent = message || "Listening…";
-  } else {
-    listenChips.style.display = "none";
-  }
-
-  micBtn.textContent = on ? "⏹ Stop listening" : "🎙️ Voice";
-
-  if (!on && "speechSynthesis" in window) {
-    window.speechSynthesis.cancel();
-  }
-}
-
-function startListening() {
-  if (!SpeechRecognition) {
-    // iPad/Safari fallback: use built-in dictation
-    setListeningUI(true, "Speech input not supported here — use iPad dictation.");
-    // Put cursor in the box so the keyboard mic is one tap away
-    q.focus();
-    // Speak gently (optional)
-    speak("Speech input isn't supported in this browser. Use the keyboard dictation mic.");
-    // Hide after a moment
-    setTimeout(() => setListeningUI(false), 2500);
-    return;
-  }
-
-  if (!recognizer) {
-    recognizer = new SpeechRecognition();
-    recognizer.lang = "en-GB";
-    recognizer.interimResults = true;   // show partial words as they come
-    recognizer.continuous = false;      // one question at a time (calm)
-
-    recognizer.onstart = () => {
-      isListening = true;
-      setListeningUI(true, "Listening…");
-    };
-
-    recognizer.onerror = (e) => {
-      isListening = false;
-      setListeningUI(true, "Couldn’t hear that — try again.");
-      // Common errors: "not-allowed", "no-speech", "audio-capture"
-      setTimeout(() => setListeningUI(false), 1800);
-    };
-
-    recognizer.onend = () => {
-      isListening = false;
-      setListeningUI(false);
-    };
-
-    recognizer.onresult = (event) => {
-      // Build transcript (final + interim)
-      let finalText = "";
-      let interimText = "";
-
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const res = event.results[i];
-        const txt = res[0].transcript;
-        if (res.isFinal) finalText += txt;
-        else interimText += txt;
-      }
-
-      // Put text into the box (don’t auto-submit)
-      q.value = (finalText || interimText).trim();
-
-      // Whisper reinforcement
-      if (finalText) setListeningUI(true, "Captured. Tap Ask when ready.");
-    };
-  }
-
-  // Start
-  try {
-    recognizer.start();
-  } catch (err) {
-    // Some browsers throw if already started
-  }
-}
-
-function stopListening() {
-  if (recognizer && isListening) {
-    recognizer.stop();
-  }
-}
-
-// Mic button: tap toggles listening
-bindTap(micBtn, () => {
-  if (isListening) stopListening();
-  else startListening();
-});
-
-      // NEW: Read answers aloud toggle (remembered)
+      // Read answers aloud toggle
       const readAnswerToggle = document.getElementById("readAnswerToggle");
       let readAnswersAloud = localStorage.getItem("readAnswersAloud") === "true";
 
@@ -486,27 +352,93 @@ bindTap(micBtn, () => {
         if (readAnswersAloud) speak("Answers will now be read aloud.");
       });
 
-      // Mock voice input
+      // Real speech input (when supported) + iPad fallback
+      const listenChips = document.getElementById("listenChips");
+      const listenStatus = document.getElementById("listenStatus");
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      let recognizer = null;
+      let isListening = false;
+
+      function setListeningUI(on, message) {
+        if (on) {
+          listenChips.style.display = "flex";
+          listenStatus.textContent = message || "Listening…";
+        } else {
+          listenChips.style.display = "none";
+        }
+        micBtn.textContent = on ? "⏹ Stop listening" : "🎙️ Voice";
+      }
+
+      function startListening() {
+        if (!SpeechRecognition) {
+          setListeningUI(true, "Speech input not supported here — use iPad dictation.");
+          q.focus();
+          speak("Use the keyboard dictation mic.");
+          setTimeout(() => setListeningUI(false), 2500);
+          return;
+        }
+
+        if (!recognizer) {
+          recognizer = new SpeechRecognition();
+          recognizer.lang = "en-GB";
+          recognizer.interimResults = true;
+          recognizer.continuous = false;
+
+          recognizer.onstart = () => {
+            isListening = true;
+            setListeningUI(true, "Listening…");
+          };
+
+          recognizer.onerror = () => {
+            isListening = false;
+            setListeningUI(true, "Couldn’t hear that — try again.");
+            setTimeout(() => setListeningUI(false), 1800);
+          };
+
+          recognizer.onend = () => {
+            isListening = false;
+            setListeningUI(false);
+          };
+
+          recognizer.onresult = (event) => {
+            let finalText = "";
+            let interimText = "";
+
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              const res = event.results[i];
+              const txt = res[0].transcript;
+              if (res.isFinal) finalText += txt;
+              else interimText += txt;
+            }
+
+            q.value = (finalText || interimText).trim();
+
+            if (finalText) setListeningUI(true, "Captured. Tap Ask when ready.");
+          };
+        }
+
+        try { recognizer.start(); } catch (e) {}
+      }
+
+      function stopListening() {
+        if (recognizer && isListening) recognizer.stop();
+      }
+
       bindTap(micBtn, () => {
-        const samples = [
-          "Who is riding Houla Cove?",
-          "Explain 'ev ch til drvn & one pce 3 out'.",
-          "What are the jockey colours for the second horse?",
-          "For showing: what does 'reserve champion' mean here?",
-          "Which horse is Irish-bred in this race?"
-        ];
-        q.value = samples[Math.floor(Math.random() * samples.length)];
-        speak("Captured. Tap Ask when ready.");
+        if (isListening) stopListening();
+        else startListening();
       });
 
+      // Q&A placeholder
       function mockAnswer(question) {
         const normalized = question.toLowerCase();
 
         if (normalized.includes("ev ch") || normalized.includes("drvn") || normalized.includes("one pce")) {
-          return "That looks like race-reading shorthand. A calm expansion could be: even ground; chased; until driven; and one-paced three out. If you tell me the full line, I’ll expand it cleanly.";
+          return "That looks like race-reading shorthand. A calm expansion could be: even ground; chased; until driven; and one-paced three out.";
         }
         if (normalized.includes("who is riding")) {
-          return "If this is connected to your Gate Card data, I’ll answer with the declared rider for that runner. (Mock mode: rider lookup not connected yet.)";
+          return "Mock mode: rider lookup not connected yet. When connected, I’ll return the declared rider for that runner.";
         }
         if (normalized.includes("irish") || normalized.includes("bred")) {
           return "Racing phrasing: ‘bred in Ireland’ is usually the clean wording. ‘Irish-bred’ can be used too, but ‘bred in Ireland’ is safest and clearest.";
@@ -514,14 +446,14 @@ bindTap(micBtn, () => {
         if (mode.toLowerCase().includes("show")) {
           return "Showing answers should be ring-first: class, judge, rules, and what ‘champion / reserve’ means in that schedule. (Mock mode: schedule lookup not connected yet.)";
         }
-        return "Mock response: I can answer anything on this card — runners, colours, breeding, form, abbreviations, or ‘what does this mean?’ Ask your next question and I’ll keep it simple.";
+        return "Mock response: Ask about runners, colours, breeding, form, abbreviations, or “what does this mean?”.";
       }
 
       function handleAsk() {
         const question = q.value.trim();
         if (!question) {
           answerText.textContent = "Type a question first (or tap Voice).";
-          answerHint.textContent = "Try: “Who is riding…?”, “What does … mean?”, or “List the runners in order.”";
+          answerHint.textContent = "Try: “Who is riding…?” or “What does … mean?”";
           speak("Please type a question first.");
           return;
         }
@@ -530,7 +462,6 @@ bindTap(micBtn, () => {
         answerText.textContent = a;
         answerHint.textContent = "If you want it shorter, ask: “Answer in one line.”";
 
-        // NEW: speak answer if opted in
         if (readAnswersAloud) speak(a);
       }
 
