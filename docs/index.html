@@ -1,507 +1,418 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>The Race Card</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ask — The Card Companion</title>
 
   <style>
-    body {
+    :root{
+      --bg: #f7f6f3;
+      --ink: #2b2b2b;
+      --soft: #6b6b6b;
+      --card: #ffffff;
+      --line: #e3e1db;
+
+      /* calm accents */
+      --celadon: #c9d5d0;
+      --celadon-ink: #2e3b37;
+      --mist: #d9dee1;
+      --lemon: #f3f0c7;
+
+      --radius: 18px;
+      --shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    body{
+      margin: 0;
       font-family: Georgia, "Times New Roman", Times, serif;
-      color: #2b2b2b;
-      background: #f7f6f3;
-      line-height: 1.6;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.55;
       padding: 16px;
     }
 
-    h1 {
-      font-size: 1.4em;
-      margin: 12px 0;
-      color: #1f1f1f;
-    }
-
-    /* ASK — big, calm, phone-first */
-    #askButton {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-
-      width: 100%;
+    .wrap{
       max-width: 560px;
-      margin: 0 auto 24px auto;
+      margin: 0 auto;
+    }
 
-      min-height: 112px;
-      padding: 20px;
+    header{
+      margin: 12px 0 14px 0;
+    }
 
-      font-family: inherit;
-      font-size: 2em;
-      line-height: 1.1;
+    h1{
+      font-size: 1.25rem;
+      margin: 0 0 6px 0;
+      letter-spacing: 0.2px;
+    }
 
+    .sub{
+      color: var(--soft);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      margin: 14px 0;
+    }
+
+    /* Whisper chips (reinforcement, not shouting) */
+    .chips{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .chip{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: 0.78rem;
+      color: var(--celadon-ink);
+      background: rgba(201,213,208,0.55);
+      border: 1px solid rgba(201,213,208,0.9);
+      padding: 6px 10px;
       border-radius: 999px;
-      border: none;
-      background: #ffffff;
-      color: #2b2b2b;
-
-      box-shadow: 0 3px 10px rgba(0,0,0,0.12);
-      cursor: pointer;
+      white-space: nowrap;
+    }
+    .chip.mist{
+      color: #2c3a43;
+      background: rgba(217,222,225,0.55);
+      border-color: rgba(217,222,225,0.95);
+    }
+    .chip.lemon{
+      color: #3b3a19;
+      background: rgba(243,240,199,0.6);
+      border-color: rgba(243,240,199,0.95);
     }
 
-    .ask-sub {
-      font-size: 0.8em;
-      margin-top: 6px;
-      color: #5a5a5a;
+    /* Orientation block */
+    .context{
+      display: grid;
+      gap: 8px;
+    }
+    .contextRow{
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+    }
+    .label{
+      color: var(--soft);
+      font-size: 0.9rem;
+    }
+    .value{
+      font-weight: 600;
+      font-size: 0.98rem;
     }
 
-    .panel {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-    }
-
-    /* Reinforced phrase (visual whisper): recognition only, never dominates */
-    .reinforce {
-      display: inline-block;
-      margin: 0 0 10px 0;
-
-      font-family: inherit;
-      font-size: 0.92em;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-
-      color: #6a6a6a;
-      opacity: 0.9;
-
+    /* Protected wording: guidance text is intentionally non-selectable */
+    .guide{
       user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      background: rgba(201,213,208,0.25);
+      border: 1px dashed rgba(201,213,208,0.9);
+      padding: 12px;
+      border-radius: 14px;
+      margin-top: 12px;
+    }
+    .guide p{
+      margin: 0 0 10px 0;
+      color: #31413b;
+      font-size: 0.98rem;
+    }
+    .guide p:last-child{ margin:0; }
+
+    /* Ask input */
+    .askArea{
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
     }
 
-    /* Safety reinforcement: allowed to be a touch firmer */
-    .reinforce--safety {
-      color: #4f4f4f;
-      opacity: 1;
+    textarea{
+      width: 100%;
+      min-height: 92px;
+      resize: vertical;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      padding: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      background: #fbfbfa;
+      outline: none;
+    }
+    textarea:focus{
+      border-color: rgba(201,213,208,0.95);
+      box-shadow: 0 0 0 4px rgba(201,213,208,0.25);
     }
 
-    #answerText {
-      min-height: 3em;
-      opacity: 0.85;
+    /* Buttons */
+    .row{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
-
-    .back-link {
-      display: inline-block;
-      margin-top: 14px;
-
-      font-size: 1.05em;
-      color: #6a6a6a;
-
-      padding: 12px 8px;
-      border-radius: 10px;
-
+    .btn{
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px 12px;
       cursor: pointer;
-      -webkit-tap-highlight-color: rgba(0,0,0,0);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: 0.95rem;
+      transition: transform 0.04s ease;
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.primary{
+      border-color: rgba(201,213,208,0.95);
+      background: rgba(201,213,208,0.35);
+      color: #23312c;
+      font-weight: 650;
     }
 
-    .back-link:hover {
+    .btn.voice{
+      border-color: rgba(217,222,225,0.95);
+      background: rgba(217,222,225,0.35);
+      color: #22303a;
+      font-weight: 650;
+    }
+
+    .btn.subtle{
+      background: #fff;
       color: #2b2b2b;
     }
 
-    /* raceContext is kept for future multi-race logic, but hidden to keep the Ask page calm and moment-focused */
-    #raceContext {
+    /* Output */
+    .answer{
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+    .answer h2{
+      font-size: 1.05rem;
+      margin: 0 0 8px 0;
+    }
+    .answerBox{
+      background: #fbfbfa;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      font-family: Georgia, "Times New Roman", Times, serif;
+    }
+    .answerBox .hint{
+      color: var(--soft);
+      font-size: 0.95rem;
+      margin-top: 8px;
+    }
+
+    /* Tiny footer note */
+    footer{
+      color: var(--soft);
+      font-size: 0.85rem;
+      margin: 14px 0 4px 0;
+      text-align: center;
+    }
+
+    /* Accessibility helper */
+    .sr-only{
       position: absolute;
-      left: -9999px;
-      top: auto;
       width: 1px;
       height: 1px;
+      padding: 0;
+      margin: -1px;
       overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 420px){
+      .row{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
 
 <body>
+  <main class="wrap" aria-label="Ask page for the card companion">
+    <header>
+      <h1>Ask about this card</h1>
+      <p class="sub">Calm Q&A for racing and showing — one question at a time.</p>
+    </header>
 
-  <div id="raceContext" aria-hidden="true">Race</div>
+    <section class="panel" aria-label="Orientation">
+      <div class="context">
+        <div class="contextRow">
+          <div class="label">Mode</div>
+          <div class="value" id="modeValue">Racing</div>
+        </div>
+        <div class="contextRow">
+          <div class="label">Card</div>
+          <div class="value" id="cardValue">Gate Card</div>
+        </div>
+        <div class="contextRow">
+          <div class="label">Focus</div>
+          <div class="value" id="focusValue">This race</div>
+        </div>
+      </div>
 
-  <button id="askButton" type="button" aria-pressed="false">
-    <div>Ask</div>
-    <div class="ask-sub" id="statusLine">about the race card</div>
-  </button>
+      <div class="chips" aria-label="Reassurance chips">
+        <div class="chip">Ask anything</div>
+        <div class="chip mist">Audio ready</div>
+        <div class="chip lemon">Private by design</div>
+      </div>
 
-  <h1>The Race Card</h1>
+      <div class="guide" aria-label="Guidance">
+        <p><strong>You’re in the right place.</strong> Ask in plain words — names, colours, riders, form, breeding, rules, timings.</p>
+        <p>If you’re on a phone: keep it short. You can always ask a second question.</p>
+      </div>
+    </section>
 
-  <div class="panel">
-    <!-- visual whisper label (kept out of screen readers) -->
-    <div id="reinforceLabel" class="reinforce" aria-hidden="true"></div>
-    <p id="answerText" role="status" aria-live="polite">&nbsp;</p>
-  </div>
+    <section class="panel" aria-label="Ask input">
+      <div class="askArea">
+        <label for="q" class="sr-only">Type your question</label>
+        <textarea id="q" placeholder="Ask a question… (e.g. “Who is riding Houla Cove?” or “Explain ‘ev ch til drvn’”)"></textarea>
 
-  <div class="back-link" onclick="goBackSmart()">
-    ← Back to race
-  </div>
+        <div class="row">
+          <button class="btn primary" id="askBtn" aria-label="Ask the question">Ask</button>
+          <button class="btn voice" id="micBtn" aria-label="Voice input (mock for now)">🎙️ Voice (mock)</button>
+        </div>
+
+        <div class="row">
+          <button class="btn subtle" id="readBtn" aria-label="Read the guidance aloud">🔊 Read this aloud</button>
+          <button class="btn subtle" id="clearBtn" aria-label="Clear the question">Clear</button>
+        </div>
+      </div>
+
+      <div class="answer" aria-live="polite" aria-label="Answer area">
+        <h2>Response</h2>
+        <div class="answerBox" id="answerBox">
+          <div id="answerText">Ask a question to see a response here.</div>
+          <div class="hint" id="answerHint">Tip: “What does X mean?” is a brilliant format for racing abbreviations.</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      This page is designed to stay calm. One card. One question. One clear answer.
+    </footer>
+  </main>
 
   <script>
-    // --- URL params (quiet config; no UI change) ---
-    const params = new URLSearchParams(window.location.search);
+    // ------------------------------------------------------------
+    // 1) Calm orientation (can be filled from URL params / QR later)
+    // Example: ask.html?mode=Showing&card=Catalogue&focus=Ring%202
+    // ------------------------------------------------------------
+    const params = new URLSearchParams(location.search);
+    const mode = params.get("mode") || "Racing";
+    const card = params.get("card") || "Gate Card";
+    const focus = params.get("focus") || "This race";
 
-    // Race context (future multi-race ready)
-    const raceContext = document.getElementById('raceContext');
-    const race = params.get('race');
-    if (raceContext) {
-      raceContext.textContent = race ? `Race ${race}` : "Race";
+    document.getElementById("modeValue").textContent = mode;
+    document.getElementById("cardValue").textContent = card;
+    document.getElementById("focusValue").textContent = focus;
+
+    // ------------------------------------------------------------
+    // 2) Audio-first: gentle read-aloud (works if browser allows)
+    // ------------------------------------------------------------
+    function speak(text) {
+      if (!("speechSynthesis" in window)) return;
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.95;     // slightly slower = calmer
+      u.pitch = 1.0;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
     }
 
-    // --- Quiet context from QR (never shown to user) ---
-    const venue = (params.get('venue') || 'ptp').toLowerCase();   // ptp | course | show
-    const scale = (params.get('scale') || '').toLowerCase();      // small | medium | large (optional)
-    const area = (params.get('area') || '').toLowerCase();        // shetland | natives | main (optional)
-    const landmark = params.get('landmark') || 'the busiest part of the course';
+    document.getElementById("readBtn").addEventListener("click", () => {
+      speak(`You are on the Ask page for ${mode}. Card: ${card}. Focus: ${focus}. Ask one clear question at a time.`);
+    });
 
-    function goBackSmart() {
-      if (window.history.length > 1) {
-        window.history.back();
+    // ------------------------------------------------------------
+    // 3) Mocked voice input (future voice hook)
+    // For now: inserts a sample transcript and "whisper" reinforces.
+    // Later: replace this with SpeechRecognition.
+    // ------------------------------------------------------------
+    const q = document.getElementById("q");
+    const micBtn = document.getElementById("micBtn");
+
+    micBtn.addEventListener("click", () => {
+      // Mock transcript examples that feel natural for racing/showing
+      const samples = [
+        "Who is riding Houla Cove?",
+        "Explain 'ev ch til drvn & one pce 3 out'.",
+        "What are the jockey colours for the second horse?",
+        "For showing: what does 'reserve champion' mean here?",
+        "Which horse is Irish-bred in this race?"
+      ];
+      const pick = samples[Math.floor(Math.random() * samples.length)];
+      q.value = pick;
+
+      // Soft reinforcement: tiny spoken confirmation (optional)
+      speak("Captured. Tap Ask when ready.");
+    });
+
+    // ------------------------------------------------------------
+    // 4) Q&A placeholder
+    // Replace 'mockAnswer' with your real fetch to your Q&A endpoint.
+    // ------------------------------------------------------------
+    function mockAnswer(question) {
+      const normalized = question.toLowerCase();
+
+      if (normalized.includes("ev ch") || normalized.includes("drvn") || normalized.includes("one pce")) {
+        return "That looks like race-reading shorthand. A calm expansion could be: even ground; chased; until driven; and one-paced three out. If you tell me the full line, I’ll expand it cleanly.";
+      }
+      if (normalized.includes("who is riding")) {
+        return "If this is connected to your Gate Card data, I’ll answer with the declared rider for that runner. (Mock mode: rider lookup not connected yet.)";
+      }
+      if (normalized.includes("irish") || normalized.includes("bred")) {
+        return "Racing phrasing: ‘bred in Ireland’ is usually the clean wording. ‘Irish-bred’ can be used too, but ‘bred in Ireland’ is safest and clearest.";
+      }
+      if (mode.toLowerCase().includes("show")) {
+        return "Showing answers should be ring-first: class, judge, rules, and what ‘champion / reserve’ means in that schedule. (Mock mode: schedule lookup not connected yet.)";
+      }
+      return "Mock response: I can answer anything on this card — runners, colours, breeding, form, abbreviations, or ‘what does this mean?’ Ask your next question and I’ll keep it simple.";
+    }
+
+    const answerText = document.getElementById("answerText");
+    const answerHint = document.getElementById("answerHint");
+
+    document.getElementById("askBtn").addEventListener("click", () => {
+      const question = q.value.trim();
+      if (!question) {
+        answerText.textContent = "Type a question first (or tap Voice).";
+        answerHint.textContent = "Try: “Who is riding…?”, “What does … mean?”, or “List the runners in order.”";
+        speak("Please type a question first.");
         return;
       }
-      window.location.href = "./";
-    }
+      const a = mockAnswer(question);
+      answerText.textContent = a;
+      answerHint.textContent = "If you want it shorter, ask: “Answer in one line.”";
 
-    function bumpAsked(id) {
-      const key = `asked_${id}`;
-      const n = Number(sessionStorage.getItem(key) || "0") + 1;
-      sessionStorage.setItem(key, String(n));
-      return n;
-    }
+      // Audio-first: optionally read the answer aloud
+      // Keep it gentle: only speak if user has pressed Read earlier? (future: user toggle)
+      // For now, do nothing automatically to avoid surprise speech.
+    });
 
-    function mapAllowed(moment) {
-      if (scale !== 'medium' && scale !== 'large') return false;
-      return (moment === 'ring_disambiguation' || moment === 'after_the_bell' || moment === 'leaving');
-    }
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      q.value = "";
+      q.focus();
+      answerText.textContent = "Ask a question to see a response here.";
+      answerHint.textContent = "Tip: “What does X mean?” is a brilliant format for racing abbreviations.";
+    });
 
-    function inferMomentFromText(q = "") {
-      const t = String(q).toLowerCase();
-
-      if (t.includes("get out") || t.includes("exit") || t.includes("car park") || t.includes("satnav")) return "leaving";
-      if (t.includes("am i needed") || t.includes("should i stay") || t.includes("miss")) return "holding_pattern";
-      if (t.includes("now what") || t.includes("silverware") || t.includes("parade")) return "after_the_bell";
-      if (t.includes("a or b") || t.includes("which side") || t.includes("this side") || t.includes("mini") || t.includes("standard")) return "ring_disambiguation";
-      if (t.includes("where is ring") || t.includes("where is the ring")) return "class_finding";
-
-      return "settling_in";
-    }
-
-    (function () {
-      const btn = document.getElementById('askButton');
-      const status = document.getElementById('statusLine');
-      const panel = document.getElementById('answerText');
-
-      // NEW: reinforcement hook
-      const reinforce = document.getElementById('reinforceLabel');
-
-      function setReinforce(text, safety = false) {
-        if (!text) {
-          reinforce.textContent = "";
-          reinforce.classList.remove('reinforce--safety');
-          return;
-        }
-        reinforce.textContent = text;
-        reinforce.classList.toggle('reinforce--safety', safety);
-      }
-
-      const ANSWERS = {
-        loo: {
-          kind: "protected",
-          tags: ["orientation", "body", "high"],
-          text: ({ venue, landmark }) => {
-            if (venue === "ptp") {
-              return `You’re not the only one to ask — it’s good to know early. At point-to-points the loos are usually portable and set up in a few different spots. If you head towards the ${landmark} or the busiest part of the course, you’ll usually find one nearby, with signs once you’re close.`;
-            }
-            return `You’re not the only one to ask — it’s good to know early. The nearest loos are usually just off the main concourse, close to the parade ring. There are signs once you’re close, and it’s worth noting there’s often another set a little further round if the nearest ones are busy later on.`;
-          }
-        },
-
-        carpark_entrance: {
-          kind: "protected",
-          tags: ["orientation", "exit", "high"],
-          text: () =>
-            `It’s a common question at the end of the day — you’re not the only one. The car park entrance is usually reached by following the main exit routes from the course. If you head towards where most people are leaving, the signs should guide you once you’re close.`
-        },
-
-        food: {
-          kind: "protected",
-          tags: ["comfort", "social", "medium"],
-          text: ({ venue, landmark }) => {
-            if (venue === "ptp") {
-              return `Food and coffee are usually around the ${landmark} or the main gathering areas. They’re often busiest just before and between races — which is also when you tend to bump into familiar faces.`;
-            }
-            return `Food and coffee are usually around the main concourse and gathering areas. They’re often busiest just before and between races — which is also when you tend to bump into familiar faces.`;
-          }
-        },
-
-        first_race_time: {
-          kind: "protected",
-          tags: ["timing", "arrival", "medium"],
-          text: () =>
-            `The first race is usually at [time]. You’ve got a bit of breathing space before it starts — enough time to get your bearings and enjoy the build-up.`
-        },
-
-        num_races: {
-          kind: "protected",
-          tags: ["timing", "planning", "medium"],
-          text: () =>
-            `There are usually [number] races on the card today. It’s a helpful one to know on arrival, especially if you’re planning to leave before the final queues build up.`
-        },
-
-        mind_your_backs: {
-          kind: "cultural",
-          tags: ["ptp_only", "cultural"],
-          text: ({ venue }) => {
-            if (venue !== "ptp") return "";
-            return `You may hear “mind your backs, please” — it’s a polite way of saying there’s a horse coming through behind you, so on hearing it, it’s best to step aside.`;
-          }
-        }
-      };
-
-      function softenIfRepeated(answerId, text, meta) {
-        const askedCount = bumpAsked(answerId);
-        const isOrientation = meta?.tags?.includes("orientation");
-
-        if (!isOrientation || askedCount <= 1) return text;
-
-        if (answerId === "loo") {
-          if (venue === "ptp") {
-            return `Loos are usually near the ${landmark} or the main gathering areas. Head towards the busiest part of the course — the signs will guide you once you’re close.`;
-          }
-          return `Loos are usually just off the main concourse near the parade ring. Head that way — the signs will guide you once you’re close.`;
-        }
-
-        if (answerId === "carpark_entrance") {
-          return `Car park entrance is usually reached via the main exit routes. Head towards where most people are leaving — signs should guide you once you’re close.`;
-        }
-
-        return text;
-      }
-
-      const intents = [
-        {
-          id: "form",
-          label: "Form comment",
-          example: "What does ‘ev ch til drvn & one pce 3 out’ mean?",
-          answer:
-            "This is shorthand describing how the horse travelled during the race. Expanded into plain English, it means the horse was always prominent, was being pushed along before the finish, and could only maintain one pace from three fences out."
-        },
-        {
-          id: "term",
-          label: "Racing term",
-          example: "What does OR mean?",
-          answer:
-            "OR stands for Official Rating. It’s a numerical assessment of a horse’s ability, used to help level the field in handicaps."
-        },
-        {
-          id: "going",
-          label: "Going / ground",
-          example: "Why does the going matter?",
-          answer:
-            "The going describes how firm or soft the ground is. Some horses perform best on soft ground, others on firmer ground, so it can significantly affect how a race unfolds."
-        },
-        {
-          id: "colours",
-          label: "Colours",
-          example: "What do the colours tell me?",
-          answer:
-            "The colours identify the owner and help you visually follow a horse during the race. They don’t affect performance, but they make tracking the right runner much easier."
-        },
-        {
-          id: "race-type",
-          label: "Race type",
-          example: "What’s a novice race?",
-          answer:
-            "A novice race is restricted to horses that have not won before a certain date or over a certain discipline, allowing less experienced horses to compete against similar rivals."
-        },
-        {
-          id: "how-to-read",
-          label: "How to read the card",
-          example: "What should I look at first?",
-          answer:
-            "Most people start with the race time, how many runners there are and what type of race. You don’t need to read everything — just enough to orient yourself before the race begins."
-        }
-      ];
-
-      const CONTEXT = { venue, scale, area, landmark, race };
-
-      const SEQUENCE = [
-        { type: "intent", id: "how-to-read" },
-        { type: "protected", id: "first_race_time" },
-        { type: "protected", id: "loo" },
-        { type: "intent", id: "term" },
-        { type: "intent", id: "going" },
-        { type: "protected", id: "food" },
-        { type: "intent", id: "form" },
-        { type: "intent", id: "colours" },
-        { type: "intent", id: "race-type" },
-        { type: "protected", id: "num_races" },
-        { type: "protected", id: "carpark_entrance" },
-        { type: "cultural", id: "mind_your_backs" }
-      ];
-
-      let seqIndex = 0;
-      let state = "idle";
-
-      function showAnswerFromSequence() {
-        const item = SEQUENCE[seqIndex % SEQUENCE.length];
-        seqIndex++;
-
-        if (item.type === "intent") {
-          setReinforce(null);
-          const intent = intents.find(x => x.id === item.id) || intents[0];
-          panel.textContent = intent.answer;
-          return;
-        }
-
-        const meta = ANSWERS[item.id];
-        if (!meta) {
-          setReinforce(null);
-          panel.textContent = "Tell me the exact phrase you’re looking at and I’ll expand it into plain race-day English — without guessing.";
-          return;
-        }
-              // --- Voice (mocked) : progressive enhancement, no UI change ---
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const voiceSupported = !!SpeechRecognition;
-
-      function listenOnce() {
-        return new Promise((resolve, reject) => {
-          if (!voiceSupported) return reject(new Error("Voice not supported"));
-
-          const rec = new SpeechRecognition();
-          rec.lang = "en-GB";
-          rec.interimResults = false;
-          rec.maxAlternatives = 1;
-
-          rec.onresult = (e) => {
-            const text = e.results?.[0]?.[0]?.transcript || "";
-            resolve(String(text).trim());
-          };
-
-          rec.onerror = (e) => reject(e);
-
-          try { rec.start(); } catch (err) { reject(err); }
-        });
-      }
-
-      // Very small, safe router from spoken words → one protected answer
-      function chooseByVoice(q) {
-        const t = String(q || "").toLowerCase();
-
-        // essentials first
-        if (t.includes("loo") || t.includes("toilet") || t.includes("bathroom")) return { type: "protected", id: "loo" };
-        if (t.includes("exit") || t.includes("get out") || t.includes("car park") || t.includes("parking") || t.includes("satnav")) return { type: "protected", id: "carpark_entrance" };
-        if (t.includes("coffee") || t.includes("burger") || t.includes("food")) return { type: "protected", id: "food" };
-        if (t.includes("mind your backs")) return { type: "cultural", id: "mind_your_backs" };
-
-        // otherwise: use your existing calm sequence
-        return null;
-      }
-
-      function showById(item) {
-        if (!item) return showAnswerFromSequence();
-
-        if (item.type === "intent") {
-          setReinforce(null);
-          const intent = intents.find(x => x.id === item.id) || intents[0];
-          panel.textContent = intent.answer;
-          return;
-        }
-
-        const meta = ANSWERS[item.id];
-        if (!meta) {
-          setReinforce(null);
-          panel.textContent = "Tell me the exact phrase you’re looking at and I’ll expand it into plain race-day English — without guessing.";
-          return;
-        }
-
-        let text = meta.text(CONTEXT);
-        if (!text) return showAnswerFromSequence();
-
-        text = softenIfRepeated(item.id, text, meta);
-
-        if (item.id === "loo") setReinforce("LOOS");
-        else if (item.id === "carpark_entrance") setReinforce("EXIT");
-        else if (item.id === "mind_your_backs") setReinforce("MIND YOUR BACKS", true);
-        else setReinforce(null);
-
-        panel.textContent = text;
-      }
-
-        let text = meta.text(CONTEXT);
-        if (!text) return showAnswerFromSequence();
-
-        text = softenIfRepeated(item.id, text, meta);
-
-        // Visual reinforcement (quiet anchors only)
-        if (item.id === "loo") setReinforce("LOOS");
-        else if (item.id === "carpark_entrance") setReinforce("EXIT");
-        else if (item.id === "mind_your_backs") setReinforce("MIND YOUR BACKS", true);
-        else setReinforce(null);
-
-        panel.textContent = text;
-      }
-
-      function setState(next) {
-        state = next;
-
-        if (state === "idle") {
-          status.textContent = "about the race card";
-          panel.innerHTML = "&nbsp;";
-          setReinforce(null);
-          btn.setAttribute("aria-pressed", "false");
-          return;
-        }
-
-        if (state === "listening") {
-          status.textContent = "Listening…";
-          panel.textContent = "Say your question as you would to the person beside you.";
-          setReinforce(null);
-          btn.setAttribute("aria-pressed", "true");
-          return;
-        }
-
-        status.textContent = "Answer";
-        showAnswerFromSequence();
-        btn.setAttribute("aria-pressed", "false");
-      }
-
-            btn.addEventListener('click', async () => {
-        // If voice is supported, use it (mocked voice input)
-        if (voiceSupported) {
-          setState("listening");
-
-          try {
-            const q = await listenOnce();
-
-            // If nothing heard, fall back gently to sequence
-            if (!q) {
-              status.textContent = "Answer";
-              showAnswerFromSequence();
-              btn.setAttribute("aria-pressed", "false");
-              return;
-            }
-
-            const chosen = chooseByVoice(q);
-            status.textContent = "Answer";
-            showById(chosen);
-            btn.setAttribute("aria-pressed", "false");
-            return;
-          } catch (e) {
-            // Voice failed (or permission denied) — fall back quietly
-          }
-        }
-
-        // No voice (or voice failed): keep your existing scaffold
-        if (state === "idle") return setState("listening");
-        if (state === "listening") return setState("answering");
-        return setState("listening");
-      });
-
-      setState("idle");
-    })();
+    // Keyboard: Ctrl/Cmd + Enter to ask
+    q.addEventListener("keydown", (e) => {
+      const isEnter = e.key === "Enter";
+      const isCmd = e.metaKey || e.ctrlKey;
+      if (isEnter && isCmd) document.getElementById("askBtn").click();
+    });
   </script>
-
 </body>
 </html>
