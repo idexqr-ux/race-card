@@ -295,4 +295,149 @@
       <div class="answer" aria-live="polite" aria-label="Answer area">
         <h2>Response</h2>
         <div class="answerBox" id="answerBox">
-          <div id="answerText">Ask a question to see a response
+          <div id="answerText">Ask a question to see a response here.</div>
+          <div class="hint" id="answerHint">Tip: “What does X mean?” is a brilliant format for racing abbreviations.</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      This page is designed to stay calm. One card. One question. One clear answer.
+    </footer>
+  </main>
+
+  <script>
+    // iPad/Safari safe: wait for DOM, then attach handlers
+    document.addEventListener("DOMContentLoaded", () => {
+
+      // ------------------------------------------------------------
+      // 1) Calm orientation (can be filled from URL params / QR later)
+      // Example: ask.html?mode=Showing&card=Catalogue&focus=Ring%202
+      // ------------------------------------------------------------
+      const params = new URLSearchParams(location.search);
+      const mode = params.get("mode") || "Racing";
+      const card = params.get("card") || "Gate Card";
+      const focus = params.get("focus") || "This race";
+
+      document.getElementById("modeValue").textContent = mode;
+      document.getElementById("cardValue").textContent = card;
+      document.getElementById("focusValue").textContent = focus;
+
+      // ------------------------------------------------------------
+      // 2) Audio-first: gentle read-aloud (works if browser allows)
+      // ------------------------------------------------------------
+      function speak(text) {
+        if (!("speechSynthesis" in window)) return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.95;     // slightly slower = calmer
+        u.pitch = 1.0;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+      }
+
+      // ------------------------------------------------------------
+      // Helpers: iPad reliable tap binding (click + touchend + pointerup)
+      // ------------------------------------------------------------
+      function bindTap(el, handler) {
+        if (!el) return;
+
+        el.addEventListener("click", handler);
+
+        el.addEventListener("touchend", (e) => {
+          e.preventDefault();
+          handler(e);
+        }, { passive: false });
+
+        el.addEventListener("pointerup", (e) => {
+          e.preventDefault();
+          handler(e);
+        });
+      }
+
+      // Elements
+      const q = document.getElementById("q");
+      const askBtn = document.getElementById("askBtn");
+      const micBtn = document.getElementById("micBtn");
+      const readBtn = document.getElementById("readBtn");
+      const clearBtn = document.getElementById("clearBtn");
+
+      const answerText = document.getElementById("answerText");
+      const answerHint = document.getElementById("answerHint");
+
+      // Read aloud
+      bindTap(readBtn, () => {
+        speak(`You are on the Ask page for ${mode}. Card: ${card}. Focus: ${focus}. Ask one clear question at a time.`);
+      });
+
+      // ------------------------------------------------------------
+      // 3) Mocked voice input (future voice hook)
+      // ------------------------------------------------------------
+      bindTap(micBtn, () => {
+        const samples = [
+          "Who is riding Houla Cove?",
+          "Explain 'ev ch til drvn & one pce 3 out'.",
+          "What are the jockey colours for the second horse?",
+          "For showing: what does 'reserve champion' mean here?",
+          "Which horse is Irish-bred in this race?"
+        ];
+        const pick = samples[Math.floor(Math.random() * samples.length)];
+        q.value = pick;
+        speak("Captured. Tap Ask when ready.");
+      });
+
+      // ------------------------------------------------------------
+      // 4) Q&A placeholder
+      // ------------------------------------------------------------
+      function mockAnswer(question) {
+        const normalized = question.toLowerCase();
+
+        if (normalized.includes("ev ch") || normalized.includes("drvn") || normalized.includes("one pce")) {
+          return "That looks like race-reading shorthand. A calm expansion could be: even ground; chased; until driven; and one-paced three out. If you tell me the full line, I’ll expand it cleanly.";
+        }
+        if (normalized.includes("who is riding")) {
+          return "If this is connected to your Gate Card data, I’ll answer with the declared rider for that runner. (Mock mode: rider lookup not connected yet.)";
+        }
+        if (normalized.includes("irish") || normalized.includes("bred")) {
+          return "Racing phrasing: ‘bred in Ireland’ is usually the clean wording. ‘Irish-bred’ can be used too, but ‘bred in Ireland’ is safest and clearest.";
+        }
+        if (mode.toLowerCase().includes("show")) {
+          return "Showing answers should be ring-first: class, judge, rules, and what ‘champion / reserve’ means in that schedule. (Mock mode: schedule lookup not connected yet.)";
+        }
+        return "Mock response: I can answer anything on this card — runners, colours, breeding, form, abbreviations, or ‘what does this mean?’ Ask your next question and I’ll keep it simple.";
+      }
+
+      function handleAsk() {
+        const question = q.value.trim();
+        if (!question) {
+          answerText.textContent = "Type a question first (or tap Voice).";
+          answerHint.textContent = "Try: “Who is riding…?”, “What does … mean?”, or “List the runners in order.”";
+          speak("Please type a question first.");
+          return;
+        }
+        const a = mockAnswer(question);
+        answerText.textContent = a;
+        answerHint.textContent = "If you want it shorter, ask: “Answer in one line.”";
+      }
+
+      // Ask button (fixed for iPad)
+      bindTap(askBtn, handleAsk);
+
+      // Clear
+      bindTap(clearBtn, () => {
+        q.value = "";
+        q.focus();
+        answerText.textContent = "Ask a question to see a response here.";
+        answerHint.textContent = "Tip: “What does X mean?” is a brilliant format for racing abbreviations.";
+      });
+
+      // Keyboard: Ctrl/Cmd + Enter to ask (desktop)
+      q.addEventListener("keydown", (e) => {
+        const isEnter = e.key === "Enter";
+        const isCmd = e.metaKey || e.ctrlKey;
+        if (isEnter && isCmd) handleAsk();
+      });
+
+    });
+  </script>
+</body>
+</html>
