@@ -167,6 +167,8 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       font-size: 0.95rem;
       transition: transform 0.04s ease;
+      -webkit-tap-highlight-color: transparent; /* iOS tap calmness */
+      touch-action: manipulation;               /* helps Safari treat as a tap */
     }
     .btn:active{ transform: translateY(1px); }
 
@@ -280,139 +282,17 @@
         <textarea id="q" placeholder="Ask a question… (e.g. “Who is riding Houla Cove?” or “Explain ‘ev ch til drvn’”)"></textarea>
 
         <div class="row">
-          <button class="btn primary" id="askBtn" aria-label="Ask the question">Ask</button>
-          <button class="btn voice" id="micBtn" aria-label="Voice input (mock for now)">🎙️ Voice (mock)</button>
+          <button class="btn primary" id="askBtn" aria-label="Ask the question" type="button">Ask</button>
+          <button class="btn voice" id="micBtn" aria-label="Voice input (mock for now)" type="button">🎙️ Voice (mock)</button>
         </div>
 
         <div class="row">
-          <button class="btn subtle" id="readBtn" aria-label="Read the guidance aloud">🔊 Read this aloud</button>
-          <button class="btn subtle" id="clearBtn" aria-label="Clear the question">Clear</button>
+          <button class="btn subtle" id="readBtn" aria-label="Read the guidance aloud" type="button">🔊 Read this aloud</button>
+          <button class="btn subtle" id="clearBtn" aria-label="Clear the question" type="button">Clear</button>
         </div>
       </div>
 
       <div class="answer" aria-live="polite" aria-label="Answer area">
         <h2>Response</h2>
         <div class="answerBox" id="answerBox">
-          <div id="answerText">Ask a question to see a response here.</div>
-          <div class="hint" id="answerHint">Tip: “What does X mean?” is a brilliant format for racing abbreviations.</div>
-        </div>
-      </div>
-    </section>
-
-    <footer>
-      This page is designed to stay calm. One card. One question. One clear answer.
-    </footer>
-  </main>
-
-  <script>
-    // ------------------------------------------------------------
-    // 1) Calm orientation (can be filled from URL params / QR later)
-    // Example: ask.html?mode=Showing&card=Catalogue&focus=Ring%202
-    // ------------------------------------------------------------
-    const params = new URLSearchParams(location.search);
-    const mode = params.get("mode") || "Racing";
-    const card = params.get("card") || "Gate Card";
-    const focus = params.get("focus") || "This race";
-
-    document.getElementById("modeValue").textContent = mode;
-    document.getElementById("cardValue").textContent = card;
-    document.getElementById("focusValue").textContent = focus;
-
-    // ------------------------------------------------------------
-    // 2) Audio-first: gentle read-aloud (works if browser allows)
-    // ------------------------------------------------------------
-    function speak(text) {
-      if (!("speechSynthesis" in window)) return;
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = 0.95;     // slightly slower = calmer
-      u.pitch = 1.0;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
-    }
-
-    document.getElementById("readBtn").addEventListener("click", () => {
-      speak(`You are on the Ask page for ${mode}. Card: ${card}. Focus: ${focus}. Ask one clear question at a time.`);
-    });
-
-    // ------------------------------------------------------------
-    // 3) Mocked voice input (future voice hook)
-    // For now: inserts a sample transcript and "whisper" reinforces.
-    // Later: replace this with SpeechRecognition.
-    // ------------------------------------------------------------
-    const q = document.getElementById("q");
-    const micBtn = document.getElementById("micBtn");
-
-    micBtn.addEventListener("click", () => {
-      // Mock transcript examples that feel natural for racing/showing
-      const samples = [
-        "Who is riding Houla Cove?",
-        "Explain 'ev ch til drvn & one pce 3 out'.",
-        "What are the jockey colours for the second horse?",
-        "For showing: what does 'reserve champion' mean here?",
-        "Which horse is Irish-bred in this race?"
-      ];
-      const pick = samples[Math.floor(Math.random() * samples.length)];
-      q.value = pick;
-
-      // Soft reinforcement: tiny spoken confirmation (optional)
-      speak("Captured. Tap Ask when ready.");
-    });
-
-    // ------------------------------------------------------------
-    // 4) Q&A placeholder
-    // Replace 'mockAnswer' with your real fetch to your Q&A endpoint.
-    // ------------------------------------------------------------
-    function mockAnswer(question) {
-      const normalized = question.toLowerCase();
-
-      if (normalized.includes("ev ch") || normalized.includes("drvn") || normalized.includes("one pce")) {
-        return "That looks like race-reading shorthand. A calm expansion could be: even ground; chased; until driven; and one-paced three out. If you tell me the full line, I’ll expand it cleanly.";
-      }
-      if (normalized.includes("who is riding")) {
-        return "If this is connected to your Gate Card data, I’ll answer with the declared rider for that runner. (Mock mode: rider lookup not connected yet.)";
-      }
-      if (normalized.includes("irish") || normalized.includes("bred")) {
-        return "Racing phrasing: ‘bred in Ireland’ is usually the clean wording. ‘Irish-bred’ can be used too, but ‘bred in Ireland’ is safest and clearest.";
-      }
-      if (mode.toLowerCase().includes("show")) {
-        return "Showing answers should be ring-first: class, judge, rules, and what ‘champion / reserve’ means in that schedule. (Mock mode: schedule lookup not connected yet.)";
-      }
-      return "Mock response: I can answer anything on this card — runners, colours, breeding, form, abbreviations, or ‘what does this mean?’ Ask your next question and I’ll keep it simple.";
-    }
-
-    const answerText = document.getElementById("answerText");
-    const answerHint = document.getElementById("answerHint");
-
-    document.getElementById("askBtn").addEventListener("click", () => {
-      const question = q.value.trim();
-      if (!question) {
-        answerText.textContent = "Type a question first (or tap Voice).";
-        answerHint.textContent = "Try: “Who is riding…?”, “What does … mean?”, or “List the runners in order.”";
-        speak("Please type a question first.");
-        return;
-      }
-      const a = mockAnswer(question);
-      answerText.textContent = a;
-      answerHint.textContent = "If you want it shorter, ask: “Answer in one line.”";
-
-      // Audio-first: optionally read the answer aloud
-      // Keep it gentle: only speak if user has pressed Read earlier? (future: user toggle)
-      // For now, do nothing automatically to avoid surprise speech.
-    });
-
-    document.getElementById("clearBtn").addEventListener("click", () => {
-      q.value = "";
-      q.focus();
-      answerText.textContent = "Ask a question to see a response here.";
-      answerHint.textContent = "Tip: “What does X mean?” is a brilliant format for racing abbreviations.";
-    });
-
-    // Keyboard: Ctrl/Cmd + Enter to ask
-    q.addEventListener("keydown", (e) => {
-      const isEnter = e.key === "Enter";
-      const isCmd = e.metaKey || e.ctrlKey;
-      if (isEnter && isCmd) document.getElementById("askBtn").click();
-    });
-  </script>
-</body>
-</html>
+          <div id="answerText">Ask a question to see a response
