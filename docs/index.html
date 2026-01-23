@@ -72,7 +72,7 @@
       font-size: 1.05em;
       color: #6a6a6a;
 
-      padding: 12px 8px
+      padding: 12px 8px;
       border-radius: 10px;
 
       cursor: pointer;
@@ -82,26 +82,16 @@
     .back-link:hover {
       color: #2b2b2b;
     }
-    
+
     /* raceContext is kept for future multi-race logic, but hidden to keep the Ask page calm and moment-focused */
-#raceContext {
-  position: absolute;
-  left: -9999px;
-  top: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-}
-
     #raceContext {
-  position: absolute;
-  left: -9999px;
-  top: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-}
-
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
   </style>
 </head>
 
@@ -135,10 +125,18 @@
       raceContext.textContent = race ? `Race ${race}` : "Race";
     }
 
+    // --- Quiet context from QR (never shown to user) ---
     // Venue context:
     //   venue=ptp    (shared space, cultural phrases may appear)
     //   venue=course (purpose-built, fenced routes; cultural phrases omitted)
-    const venue = (params.get('venue') || 'ptp').toLowerCase(); // 'ptp' | 'course'
+    //   venue=show   (showground context)
+    const venue = (params.get('venue') || 'ptp').toLowerCase();   // ptp | course | show
+
+    // Optional sizing context for when maps ever surface
+    const scale = (params.get('scale') || '').toLowerCase();      // small | medium | large (optional)
+
+    // Optional area context (e.g. shetland) — future use
+    const area = (params.get('area') || '').toLowerCase();        // shetland | natives | main (optional)
 
     // Landmark label (only swaps nouns; keeps tone stable)
     // Examples: landmark=shopping%20village | trade%20stands | retail%20village | main%20concourse
@@ -159,6 +157,25 @@
       const n = Number(sessionStorage.getItem(key) || "0") + 1;
       sessionStorage.setItem(key, String(n));
       return n;
+    }
+
+    // Optional: formalises your “maps are conditional tools” rule (not used yet)
+    function mapAllowed(moment) {
+      if (scale !== 'medium' && scale !== 'large') return false;
+      return (moment === 'ring_disambiguation' || moment === 'after_the_bell' || moment === 'leaving');
+    }
+
+    // Optional: quiet moment inference stub (not used yet)
+    function inferMomentFromText(q = "") {
+      const t = String(q).toLowerCase();
+
+      if (t.includes("get out") || t.includes("exit") || t.includes("car park") || t.includes("satnav")) return "leaving";
+      if (t.includes("am i needed") || t.includes("should i stay") || t.includes("miss")) return "holding_pattern";
+      if (t.includes("now what") || t.includes("silverware") || t.includes("parade")) return "after_the_bell";
+      if (t.includes("a or b") || t.includes("which side") || t.includes("this side") || t.includes("mini") || t.includes("standard")) return "ring_disambiguation";
+      if (t.includes("where is ring") || t.includes("where is the ring")) return "class_finding";
+
+      return "settling_in"; // safe default: calm and non-instructive
     }
 
     (function () {
@@ -293,8 +310,8 @@
         }
       ];
 
-      // Context object for templating answers
-      const CONTEXT = { venue, landmark, race };
+      // Context object for templating answers (quiet QR context included)
+      const CONTEXT = { venue, scale, area, landmark, race };
 
       // Sequence: mixes your intent cards with protected/cultural items.
       // This is temporary until real question selection exists.
