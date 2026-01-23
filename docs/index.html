@@ -372,12 +372,17 @@
 
       function startListening() {
         if (!SpeechRecognition) {
-          setListeningUI(true, "Speech input not supported here — use iPad dictation.");
-          q.focus();
-          speak("Use the keyboard dictation mic.");
-          setTimeout(() => setListeningUI(false), 2500);
-          return;
-        }
+  setListeningUI(true, "iPad: tap the box, then use the keyboard mic.");
+  q.focus();
+  q.scrollIntoView({ behavior: "smooth", block: "center" });
+
+  // (Optional) put a gentle starter so the user sees something happened:
+  // q.value = q.value || "";
+
+  // Don’t speak here (speaking can feel like “nagging”)
+  setTimeout(() => setListeningUI(false), 2500);
+  return;
+}
 
         if (!recognizer) {
           recognizer = new SpeechRecognition();
