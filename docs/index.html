@@ -356,6 +356,7 @@
 
       // Elements
       const q = document.getElementById("q");
+      q.focus();
       const askBtn = document.getElementById("askBtn");
       const micBtn = document.getElementById("micBtn");
       const readBtn = document.getElementById("readBtn");
@@ -431,13 +432,14 @@
       });
 
       // Keyboard: Ctrl/Cmd + Enter to ask (desktop)
-      q.addEventListener("keydown", (e) => {
-        const isEnter = e.key === "Enter";
-        const isCmd = e.metaKey || e.ctrlKey;
-        if (isEnter && isCmd) handleAsk();
-      });
+     q.addEventListener("keydown", (e) => {
+  // iPad: Enter submits, Shift+Enter makes a new line
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    handleAsk();
+  }
+});
 
-    });
   </script>
 </body>
 </html>
