@@ -32,7 +32,6 @@
     }
 
     .wrap{ max-width: 560px; margin: 0 auto; }
-
     header{ margin: 12px 0 14px 0; }
 
     h1{
@@ -40,7 +39,6 @@
       margin: 0 0 6px 0;
       letter-spacing: 0.2px;
     }
-
     .sub{ color: var(--soft); font-size: 0.95rem; margin: 0; }
 
     .panel{
@@ -51,6 +49,16 @@
       padding: 14px;
       margin: 14px 0;
     }
+
+    .context{ display: grid; gap: 8px; }
+    .contextRow{
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+    }
+    .label{ color: var(--soft); font-size: 0.9rem; }
+    .value{ font-weight: 600; font-size: 0.98rem; }
 
     .chips{
       display: flex;
@@ -78,16 +86,6 @@
       background: rgba(243,240,199,0.6);
       border-color: rgba(243,240,199,0.95);
     }
-
-    .context{ display: grid; gap: 8px; }
-    .contextRow{
-      display:flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: baseline;
-    }
-    .label{ color: var(--soft); font-size: 0.9rem; }
-    .value{ font-weight: 600; font-size: 0.98rem; }
 
     .guide{
       user-select: none;
@@ -126,6 +124,7 @@
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
+
     .btn{
       border: 1px solid var(--line);
       background: #fff;
@@ -160,7 +159,6 @@
       padding-top: 12px;
     }
     .answer h2{ font-size: 1.05rem; margin: 0 0 8px 0; }
-
     .answerBox{
       background: #fbfbfa;
       border: 1px solid var(--line);
@@ -204,18 +202,9 @@
 
     <section class="panel" aria-label="Orientation">
       <div class="context">
-        <div class="contextRow">
-          <div class="label">Mode</div>
-          <div class="value" id="modeValue">Racing</div>
-        </div>
-        <div class="contextRow">
-          <div class="label">Card</div>
-          <div class="value" id="cardValue">Gate Card</div>
-        </div>
-        <div class="contextRow">
-          <div class="label">Focus</div>
-          <div class="value" id="focusValue">This race</div>
-        </div>
+        <div class="contextRow"><div class="label">Mode</div><div class="value" id="modeValue">Racing</div></div>
+        <div class="contextRow"><div class="label">Card</div><div class="value" id="cardValue">Gate Card</div></div>
+        <div class="contextRow"><div class="label">Focus</div><div class="value" id="focusValue">This race</div></div>
       </div>
 
       <div class="chips" aria-label="Reassurance chips">
@@ -245,12 +234,10 @@
           <button class="btn subtle" id="clearBtn" type="button">Clear</button>
         </div>
 
-        <!-- Listening whisper -->
         <div class="chips" id="listenChips" style="display:none;">
           <div class="chip mist" id="listenStatus">Listening…</div>
         </div>
 
-        <!-- Read answers aloud toggle -->
         <div class="row" style="margin-top:6px;">
           <button class="btn subtle" id="readAnswerToggle" type="button" aria-pressed="false">
             🔈 Read answers aloud: Off
@@ -261,7 +248,7 @@
 
       <div class="answer" aria-live="polite" aria-label="Answer area">
         <h2>Response</h2>
-        <div class="answerBox" id="answerBox">
+        <div class="answerBox">
           <div id="answerText">Ask a question to see a response here.</div>
           <div class="hint" id="answerHint">Tip: “What does X mean?” is a brilliant format for racing abbreviations.</div>
         </div>
@@ -275,175 +262,79 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-
-      // Orientation
+      // Orientation from URL params (future QR)
       const params = new URLSearchParams(location.search);
-      const mode = params.get("mode") || "Racing";
-      const card = params.get("card") || "Gate Card";
+      const mode  = params.get("mode")  || "Racing";
+      const card  = params.get("card")  || "Gate Card";
       const focus = params.get("focus") || "This race";
 
-      document.getElementById("modeValue").textContent = mode;
-      document.getElementById("cardValue").textContent = card;
+      document.getElementById("modeValue").textContent  = mode;
+      document.getElementById("cardValue").textContent  = card;
       document.getElementById("focusValue").textContent = focus;
-
-      // Speak (output)
-      function speak(text) {
-        if (!("speechSynthesis" in window)) return;
-        const u = new SpeechSynthesisUtterance(text);
-        u.rate = 0.95;
-        u.pitch = 1.0;
-        u.volume = 0.85;
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(u);
-      }
-
-      // Polite: stop speaking when user touches screen
-      document.addEventListener("touchstart", () => {
-        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-      }, { passive: true });
-
-      // Tap helper (iPad safe)
-      function bindTap(el, handler) {
-        if (!el) return;
-        el.addEventListener("click", handler);
-        el.addEventListener("touchend", (e) => {
-          e.preventDefault();
-          handler(e);
-        }, { passive: false });
-        el.addEventListener("pointerup", (e) => {
-          e.preventDefault();
-          handler(e);
-        });
-      }
 
       // Elements
       const q = document.getElementById("q");
-      q.focus();
-
       const askBtn = document.getElementById("askBtn");
       const micBtn = document.getElementById("micBtn");
       const readBtn = document.getElementById("readBtn");
       const clearBtn = document.getElementById("clearBtn");
-
       const answerText = document.getElementById("answerText");
       const answerHint = document.getElementById("answerHint");
-
-      // Guidance read aloud
-      bindTap(readBtn, () => {
-        speak(`You are on the Ask page for ${mode}. Card: ${card}. Focus: ${focus}. Ask one clear question at a time.`);
-      });
-
-      // Read answers aloud toggle
+      const listenChips = document.getElementById("listenChips");
+      const listenStatus = document.getElementById("listenStatus");
       const readAnswerToggle = document.getElementById("readAnswerToggle");
+
+      q.focus();
+
+      // Speech output
+      function speak(text) {
+        if (!("speechSynthesis" in window)) return;
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.95;
+        u.pitch = 1.0;
+        u.volume = 0.85;
+        window.speechSynthesis.speak(u);
+      }
+
+      // Polite: touching cancels speech
+      document.addEventListener("touchstart", () => {
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      }, { passive: true });
+
+      // Read answers aloud toggle (remembered)
       let readAnswersAloud = localStorage.getItem("readAnswersAloud") === "true";
 
       function updateReadToggle() {
         readAnswerToggle.textContent = readAnswersAloud
           ? "🔊 Read answers aloud: On"
           : "🔈 Read answers aloud: Off";
-        readAnswerToggle.setAttribute("aria-pressed", readAnswersAloud);
+        readAnswerToggle.setAttribute("aria-pressed", String(readAnswersAloud));
       }
       updateReadToggle();
 
-      bindTap(readAnswerToggle, () => {
+      // Events (kept very simple for iPad reliability)
+      readAnswerToggle.addEventListener("click", () => {
         readAnswersAloud = !readAnswersAloud;
-        localStorage.setItem("readAnswersAloud", readAnswersAloud);
+        localStorage.setItem("readAnswersAloud", String(readAnswersAloud));
         updateReadToggle();
         if (readAnswersAloud) speak("Answers will now be read aloud.");
       });
 
-      // Real speech input (when supported) + iPad fallback
-      const listenChips = document.getElementById("listenChips");
-      const listenStatus = document.getElementById("listenStatus");
-
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      let recognizer = null;
-      let isListening = false;
-
-      function setListeningUI(on, message) {
-        if (on) {
-          listenChips.style.display = "flex";
-          listenStatus.textContent = message || "Listening…";
-        } else {
-          listenChips.style.display = "none";
-        }
-        micBtn.textContent = on ? "⏹ Stop listening" : "🎙️ Voice";
-      }
-
-      function startListening() {
-       if (!SpeechRecognition) {
-  setListeningUI(true, "iPad: use the keyboard mic.");
-  q.focus();
-  q.value = "Tap the keyboard mic and speak…";
-  setTimeout(() => setListeningUI(false), 2500);
-  return;
-}
-
-  // (Optional) put a gentle starter so the user sees something happened:
-  // q.value = q.value || "";
-
-  // Don’t speak here (speaking can feel like “nagging”)
-  setTimeout(() => setListeningUI(false), 2500);
-  return;
-}
-
-        if (!recognizer) {
-          recognizer = new SpeechRecognition();
-          recognizer.lang = "en-GB";
-          recognizer.interimResults = true;
-          recognizer.continuous = false;
-
-          recognizer.onstart = () => {
-            isListening = true;
-            setListeningUI(true, "Listening…");
-          };
-
-          recognizer.onerror = () => {
-            isListening = false;
-            setListeningUI(true, "Couldn’t hear that — try again.");
-            setTimeout(() => setListeningUI(false), 1800);
-          };
-
-          recognizer.onend = () => {
-            isListening = false;
-            setListeningUI(false);
-          };
-
-          recognizer.onresult = (event) => {
-            let finalText = "";
-            let interimText = "";
-
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-              const res = event.results[i];
-              const txt = res[0].transcript;
-              if (res.isFinal) finalText += txt;
-              else interimText += txt;
-            }
-
-            q.value = (finalText || interimText).trim();
-            q.focus();
-    q.setSelectionRange(q.value.length, q.value.length);
-
-            if (finalText) setListeningUI(true, "Captured. Tap Ask when ready.");
-          };
-        }
-
-        try { recognizer.start(); } catch (e) {}
-      }
-
-      function stopListening() {
-        if (recognizer && isListening) recognizer.stop();
-      }
-
-      bindTap(micBtn, () => {
-        if (isListening) stopListening();
-        else startListening();
+      readBtn.addEventListener("click", () => {
+        speak(`You are on the Ask page for ${mode}. Card: ${card}. Focus: ${focus}. Ask one clear question at a time.`);
       });
 
-      // Q&A placeholder
+      clearBtn.addEventListener("click", () => {
+        q.value = "";
+        q.focus();
+        answerText.textContent = "Ask a question to see a response here.";
+        answerHint.textContent = "Tip: “What does X mean?” is a brilliant format for racing abbreviations.";
+      });
+
+      // Mock answer (placeholder)
       function mockAnswer(question) {
         const normalized = question.toLowerCase();
-
         if (normalized.includes("ev ch") || normalized.includes("drvn") || normalized.includes("one pce")) {
           return "That looks like race-reading shorthand. A calm expansion could be: even ground; chased; until driven; and one-paced three out.";
         }
@@ -462,43 +353,23 @@
       function handleAsk() {
         const question = q.value.trim();
         if (!question) {
-          answerText.textContent = "Type a question first (or tap Voice).";
+          answerText.textContent = "Type a question first (or use iPad dictation in the box).";
           answerHint.textContent = "Try: “Who is riding…?” or “What does … mean?”";
-          if (readAnswersAloud) 
-          // Only speak prompts if the user has opted into audio answers
-        if (readAnswersAloud) speak("Please type a question first.");
+          // Only speak prompts if user opted into audio
+          if (readAnswersAloud) speak("Please type a question first.");
           return;
         }
-
         const a = mockAnswer(question);
         answerText.textContent = a;
         answerHint.textContent = "If you want it shorter, ask: “Answer in one line.”";
-
         if (readAnswersAloud) speak(a);
       }
 
-      // Wire Ask button (iPad-safe)
-askBtn.addEventListener("click", handleAsk);
-askBtn.addEventListener("touchend", handleAsk, { passive: true });
+      // Ask button (iPad-safe)
+      askBtn.addEventListener("click", handleAsk);
+      askBtn.addEventListener("touchend", handleAsk, { passive: true });
 
-      function bindTap(el, handler) {
-  if (!el) return;
-
-  // The universal, safest event
-  el.addEventListener("click", handler);
-
-  // iOS Safari helper: allow taps that sometimes skip click
-  el.addEventListener("touchend", handler, { passive: true });
-}
-
-      bindTap(clearBtn, () => {
-        q.value = "";
-        q.focus();
-        answerText.textContent = "Ask a question to see a response here.";
-        answerHint.textContent = "Tip: “What does X mean?” is a brilliant format for racing abbreviations.";
-      });
-
-      // iPad: Enter submits, Shift+Enter new line
+      // Enter submits (iPad: Shift+Enter = new line)
       q.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
@@ -506,6 +377,74 @@ askBtn.addEventListener("touchend", handleAsk, { passive: true });
         }
       });
 
+      // Voice input: real speech recognition where supported, iPad fallback guidance
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      let recognizer = null;
+      let isListening = false;
+
+      function setListeningUI(on, message) {
+        if (on) {
+          listenChips.style.display = "flex";
+          listenStatus.textContent = message || "Listening…";
+          micBtn.textContent = "⏹ Stop listening";
+        } else {
+          listenChips.style.display = "none";
+          micBtn.textContent = "🎙️ Voice";
+        }
+      }
+
+      function startListening() {
+        if (!SpeechRecognition) {
+          // iPad fallback: keyboard dictation
+          setListeningUI(true, "iPad: tap the box, then use the keyboard mic.");
+          q.focus();
+          setTimeout(() => setListeningUI(false), 2200);
+          return;
+        }
+
+        if (!recognizer) {
+          recognizer = new SpeechRecognition();
+          recognizer.lang = "en-GB";
+          recognizer.interimResults = true;
+          recognizer.continuous = false;
+
+          recognizer.onstart = () => { isListening = true; setListeningUI(true, "Listening…"); };
+          recognizer.onerror = () => {
+            isListening = false;
+            setListeningUI(true, "Couldn’t hear that — try again.");
+            setTimeout(() => setListeningUI(false), 1600);
+          };
+          recognizer.onend = () => { isListening = false; setListeningUI(false); };
+
+          recognizer.onresult = (event) => {
+            let finalText = "";
+            let interimText = "";
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              const res = event.results[i];
+              const txt = res[0].transcript;
+              if (res.isFinal) finalText += txt;
+              else interimText += txt;
+            }
+            q.value = (finalText || interimText).trim();
+            q.focus();
+            if (finalText) {
+              setListeningUI(true, "Captured. Tap Ask when ready.");
+              setTimeout(() => setListeningUI(false), 1400);
+            }
+          };
+        }
+
+        try { recognizer.start(); } catch (e) {}
+      }
+
+      function stopListening() {
+        if (recognizer && isListening) recognizer.stop();
+      }
+
+      micBtn.addEventListener("click", () => {
+        if (isListening) stopListening();
+        else startListening();
+      });
     });
   </script>
 </body>
