@@ -399,6 +399,11 @@
   micBtn.textContent = "🎙️ Dictation (iPad)";
   q.focus();
   q.scrollIntoView({ behavior: "smooth", block: "center" });
+
+  if (!q.value.trim()) {
+    q.value = "Use the keyboard mic to dictate your question…";
+  }
+
   setTimeout(() => {
     setListeningUI(false);
     micBtn.textContent = "🎙️ Voice";
