@@ -465,6 +465,10 @@
         if (readAnswersAloud) speak(a);
       }
 
+      // Wire Ask button (iPad-safe)
+askBtn.addEventListener("click", handleAsk);
+askBtn.addEventListener("touchend", handleAsk, { passive: true });
+
       function bindTap(el, handler) {
   if (!el) return;
 
