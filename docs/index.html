@@ -395,12 +395,16 @@
 
       function startListening() {
         if (!SpeechRecognition) {
-          // iPad fallback: keyboard dictation
-          setListeningUI(true, "iPad: tap the box, then use the keyboard mic.");
-          q.focus();
-          setTimeout(() => setListeningUI(false), 2200);
-          return;
-        }
+  setListeningUI(true, "iPad: tap the box, then use the keyboard mic.");
+  micBtn.textContent = "🎙️ Dictation (iPad)";
+  q.focus();
+  q.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => {
+    setListeningUI(false);
+    micBtn.textContent = "🎙️ Voice";
+  }, 2200);
+  return;
+}
 
         if (!recognizer) {
           recognizer = new SpeechRecognition();
