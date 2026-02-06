@@ -585,5 +585,49 @@
   }
 </script>
 
+  <script>
+let legends = [];
+
+// Load legends CSV once
+fetch("../docs/legends/legends.csv")
+  .then(r => r.text())
+  .then(parseLegendsCSV);
+
+function parseLegendsCSV(text) {
+  const lines = text.trim().split("\n");
+  const headers = lines.shift().split(",");
+
+  legends = lines.map(line => {
+    const cols = line.split(",");
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = (cols[i] || "").trim());
+    return obj;
+  });
+}
+
+function findLegendMatch(question) {
+  if (!question || legends.length === 0) return null;
+
+  const words = question.toUpperCase().split(/\s+/);
+
+  return legends.find(l =>
+    words.includes(l.code.toUpperCase())
+  );
+}
+
+function renderLegendHint(question) {
+  const match = findLegendMatch(question);
+  if (!match) return "";
+
+  return `
+    <p class="legend-hint">
+      <a href="/docs/legends/#${match.anchor}">
+        What does ${match.code} mean?
+      </a>
+    </p>
+  `;
+}
+</script>
+
 </body>
 </html>
