@@ -341,7 +341,7 @@
           if(nm) INDEX_BY_NAME.set(nm, row);
         });
 
-        statusEl.textContent = "Ready";
+        statusEl.textContent = `Ready (Legends: ${LEGENDS.length}, Gatecard: ${GATECARD.length})`;
       }catch(e){
         statusEl.textContent = "Ready (data not loaded)";
       }
