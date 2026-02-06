@@ -374,6 +374,24 @@ const u = new SpeechSynthesisUtterance(text);
     function generateCalmAnswer(question){
       const raw = clean(question);
       const q = lower(raw);
+function sexToWord(sexRaw){
+  const s = lower(sexRaw);
+  if(s === "m") return "mare";
+  if(s === "f") return "filly";
+  if(s === "g") return "gelding";
+  if(s === "c") return "colt";
+  if(s === "h") return "horse";
+  return clean(sexRaw) || "";
+}
+
+function ageSexPhrase(ageRaw, sexRaw){
+  const age = clean(ageRaw);
+  const sexWord = sexToWord(sexRaw);
+  if(age && sexWord) return `${age} year old ${sexWord}`;
+  if(age) return `${age} year old`;
+  if(sexWord) return sexWord;
+  return "";
+}
 
       const orientation =
         "You’re in the Ask companion. I can speak answers and show a quiet written echo. " +
@@ -418,7 +436,9 @@ const sleeves = clean(horse.sleeves_colour) || "not set";
         if(horse){
           const bits = [];
           bits.push(`${horse.horse_name}.`);
-          if(clean(horse.age) || clean(horse.sex)) bits.push(`Age/sex: ${clean(horse.age)} ${clean(horse.sex)}.`.trim());
+         const as = ageSexPhrase(horse.age, horse.sex);
+if(as) bits.push(`${as}.`);
+ ${clean(horse.sex)}.`.trim());
           if(clean(horse.trainer)) bits.push(`Trainer: ${horse.trainer}.`);
           if(clean(horse.jockey)) bits.push(`Jockey: ${horse.jockey}.`);
           if(clean(horse.notes)) bits.push(`Notes: ${horse.notes}`);
