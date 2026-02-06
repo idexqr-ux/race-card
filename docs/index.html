@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ask — The Card Companion</title>
+  <title>Ask — Calm QR Companion</title>
 
   <style>
     :root{
@@ -20,162 +20,215 @@
 
       --radius: 18px;
       --shadow: 0 6px 18px rgba(0,0,0,0.06);
+
+      --focus: 0 0 0 4px rgba(201, 213, 208, 0.85);
     }
 
+    *{ box-sizing: border-box; }
     body{
       margin: 0;
       font-family: Georgia, "Times New Roman", Times, serif;
       color: var(--ink);
       background: var(--bg);
-      line-height: 1.55;
+      line-height: 1.6;
       padding: 16px;
     }
 
-    .wrap{ max-width: 560px; margin: 0 auto; }
-    header{ margin: 12px 0 14px 0; }
+    .wrap{
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    header{
+      margin: 6px 0 14px 0;
+    }
 
     h1{
-      font-size: 1.25rem;
-      margin: 0 0 6px 0;
+      font-size: 1.35rem;
+      margin: 8px 0 6px 0;
+      font-weight: 700;
       letter-spacing: 0.2px;
     }
-    .sub{ color: var(--soft); font-size: 0.95rem; margin: 0; }
 
-    .panel{
+    .sub{
+      margin: 0;
+      color: var(--soft);
+      font-size: 0.98rem;
+    }
+
+    .card{
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 14px;
-      margin: 14px 0;
+      margin: 12px 0;
     }
 
-    .context{ display: grid; gap: 8px; }
-    .contextRow{
-      display:flex;
-      justify-content: space-between;
+    /* Big calm primary */
+    .askButton{
+      display: grid;
+      gap: 8px;
+      align-items: center;
+      justify-items: center;
+
+      width: 100%;
+      min-height: 120px;
+      padding: 18px;
+
+      border-radius: 22px;
+      border: 2px solid var(--celadon);
+      background: linear-gradient(180deg, rgba(201,213,208,0.30), rgba(201,213,208,0.12));
+      color: var(--celadon-ink);
+
+      font: inherit;
+      cursor: pointer;
+      user-select: none;
+    }
+    .askButton:focus{
+      outline: none;
+      box-shadow: var(--focus);
+    }
+    .askBig{
+      font-size: 2.1rem;
+      letter-spacing: 1px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .askHint{
+      font-size: 1rem;
+      color: rgba(46,59,55,0.85);
+      text-align: center;
+      max-width: 42ch;
+    }
+
+    /* Secondary controls */
+    .row{
+      display: grid;
+      grid-template-columns: 1fr;
       gap: 10px;
-      align-items: baseline;
     }
-    .label{ color: var(--soft); font-size: 0.9rem; }
-    .value{ font-weight: 600; font-size: 0.98rem; }
+    @media (min-width: 680px){
+      .row{ grid-template-columns: 1fr 1fr; }
+    }
 
+    .btn{
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      cursor: pointer;
+    }
+    .btn:focus{ outline: none; box-shadow: var(--focus); }
+
+    .btnSoft{
+      background: linear-gradient(180deg, rgba(243,240,199,0.45), rgba(243,240,199,0.15));
+      border-color: rgba(227,225,219,1);
+    }
+
+    .btnMic{
+      border: 1px dashed rgba(107,107,107,0.55);
+      background: linear-gradient(180deg, rgba(217,222,225,0.35), rgba(217,222,225,0.10));
+      color: #3a3a3a;
+    }
+
+    /* Whisper reinforcement chips */
     .chips{
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-top: 10px;
+      margin: 10px 0 2px 0;
     }
     .chip{
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: 0.78rem;
-      color: var(--celadon-ink);
-      background: rgba(201,213,208,0.55);
-      border: 1px solid rgba(201,213,208,0.9);
-      padding: 6px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
       border-radius: 999px;
-      white-space: nowrap;
-    }
-    .chip.mist{
-      color: #2c3a43;
-      background: rgba(217,222,225,0.55);
-      border-color: rgba(217,222,225,0.95);
-    }
-    .chip.lemon{
-      color: #3b3a19;
-      background: rgba(243,240,199,0.6);
-      border-color: rgba(243,240,199,0.95);
-    }
-
-    .guide{
-      user-select: none;
-      -webkit-user-select: none;
-      -ms-user-select: none;
-      background: rgba(201,213,208,0.25);
-      border: 1px dashed rgba(201,213,208,0.9);
-      padding: 12px;
-      border-radius: 14px;
-      margin-top: 12px;
-    }
-    .guide p{ margin: 0 0 10px 0; color: #31413b; font-size: 0.98rem; }
-    .guide p:last-child{ margin:0; }
-
-    .askArea{ display: grid; gap: 10px; margin-top: 12px; }
-
-    textarea{
-      width: 100%;
-      min-height: 92px;
-      resize: vertical;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      padding: 12px;
-      font-size: 1rem;
-      font-family: inherit;
-      background: #fbfbfa;
-      outline: none;
-    }
-    textarea:focus{
-      border-color: rgba(201,213,208,0.95);
-      box-shadow: 0 0 0 4px rgba(201,213,208,0.25);
-    }
-
-    .row{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .btn{
       border: 1px solid var(--line);
       background: #fff;
-      border-radius: 14px;
-      padding: 12px 12px;
-      cursor: pointer;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: 0.95rem;
-      transition: transform 0.04s ease;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-    .btn:active{ transform: translateY(1px); }
-
-    .btn.primary{
-      border-color: rgba(201,213,208,0.95);
-      background: rgba(201,213,208,0.35);
-      color: #23312c;
-      font-weight: 650;
-    }
-    .btn.voice{
-      border-color: rgba(217,222,225,0.95);
-      background: rgba(217,222,225,0.35);
-      color: #22303a;
-      font-weight: 650;
-    }
-    .btn.subtle{ background: #fff; color: #2b2b2b; }
-
-    .answer{
-      margin-top: 12px;
-      border-top: 1px solid var(--line);
-      padding-top: 12px;
-    }
-    .answer h2{ font-size: 1.05rem; margin: 0 0 8px 0; }
-    .answerBox{
-      background: #fbfbfa;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px;
-      font-family: Georgia, "Times New Roman", Times, serif;
-    }
-    .answerBox .hint{ color: var(--soft); font-size: 0.95rem; margin-top: 8px; }
-
-    footer{
       color: var(--soft);
-      font-size: 0.85rem;
-      margin: 14px 0 4px 0;
-      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.98rem;
+    }
+    .chip:focus{ outline: none; box-shadow: var(--focus); }
+    .dot{
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--celadon);
+      box-shadow: 0 0 0 3px rgba(201,213,208,0.25);
     }
 
-    .sr-only{
+    /* Output area */
+    .outputTitle{
+      margin: 0 0 6px 0;
+      font-weight: 700;
+    }
+    .answer{
+      margin: 0;
+      font-size: 1.05rem;
+    }
+    .meta{
+      margin: 10px 0 0 0;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      color: var(--soft);
+      font-size: 0.95rem;
+      display: grid;
+      gap: 4px;
+    }
+
+    /* “Protected wording” block */
+    details{
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(201,213,208,0.12);
+      padding: 10px 12px;
+    }
+    details summary{
+      cursor: pointer;
+      color: var(--celadon-ink);
+      font-weight: 700;
+      list-style: none;
+    }
+    details summary::-webkit-details-marker{ display: none; }
+    .protected{
+      margin: 10px 0 0 0;
+      color: #3a3a3a;
+      font-size: 0.98rem;
+    }
+    .protected code{
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--line);
+      padding: 0 6px;
+      border-radius: 8px;
+    }
+
+    /* Quiet input */
+    label{
+      display: block;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+    }
+    input[type="text"]{
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      font: inherit;
+      background: #fff;
+      color: var(--ink);
+    }
+    input[type="text"]:focus{
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    /* Small utility */
+    .srOnly{
       position: absolute;
       width: 1px;
       height: 1px;
@@ -186,313 +239,227 @@
       white-space: nowrap;
       border: 0;
     }
-
-    @media (max-width: 420px){
-      .row{ grid-template-columns: 1fr; }
-    }
   </style>
 </head>
 
 <body>
-  <main class="wrap" aria-label="Ask page for the card companion">
+  <div class="wrap">
     <header>
-      <h1>Ask about this card</h1>
-      <p class="sub">Calm Q&A for racing and showing — one question at a time.</p>
+      <h1>Ask — Calm QR Companion</h1>
+      <p class="sub">Audio-first answers with quiet visual reinforcement. Designed to be read aloud calmly.</p>
     </header>
 
-    <section class="panel" aria-label="Orientation">
-      <div class="context">
-        <div class="contextRow"><div class="label">Mode</div><div class="value" id="modeValue">Racing</div></div>
-        <div class="contextRow"><div class="label">Card</div><div class="value" id="cardValue">Gate Card</div></div>
-        <div class="contextRow"><div class="label">Focus</div><div class="value" id="focusValue">This race</div></div>
+    <!-- Primary ASK -->
+    <button id="askButton" class="askButton" type="button" aria-describedby="askHint">
+      <div class="askBig">ASK</div>
+      <div id="askHint" class="askHint">
+        Tap once for a calm spoken answer. If you prefer, choose a whisper prompt below.
       </div>
+    </button>
 
-      <div class="chips" aria-label="Reassurance chips">
-        <div class="chip">Ask anything</div>
-        <div class="chip mist">Audio ready</div>
-        <div class="chip lemon">Private by design</div>
+    <!-- Whisper reinforcement labels -->
+    <div class="card" aria-label="Whisper reinforcement">
+      <div class="outputTitle">Whisper prompts</div>
+      <p class="sub" style="margin-top:0">
+        These are gentle “quick asks” — designed to guide without shouting.
+      </p>
+
+      <div class="chips" role="list">
+        <button class="chip" type="button" data-q="Where am I? What should I look for first?">
+          <span class="dot" aria-hidden="true"></span> Calm orientation
+        </button>
+        <button class="chip" type="button" data-q="What is this card? What can I ask it?">
+          <span class="dot" aria-hidden="true"></span> What is this?
+        </button>
+        <button class="chip" type="button" data-q="Explain the colours and the cap/body/sleeves quietly.">
+          <span class="dot" aria-hidden="true"></span> Colours help
+        </button>
+        <button class="chip" type="button" data-q="Tell me the next practical thing to do here.">
+          <span class="dot" aria-hidden="true"></span> Next step
+        </button>
+        <button class="chip" type="button" data-q="Give me a short, calm summary of the race/showing context.">
+          <span class="dot" aria-hidden="true"></span> Quiet summary
+        </button>
       </div>
+    </div>
 
-      <div class="guide" aria-label="Guidance">
-        <p><strong>You’re in the right place.</strong> Ask in plain words — names, colours, riders, form, breeding, rules, timings.</p>
-        <p>If you’re on a phone: keep it short. You can always ask a second question.</p>
-      </div>
-    </section>
-
-    <section class="panel" aria-label="Ask input">
-      <div class="askArea">
-        <label for="q" class="sr-only">Type your question</label>
-        <textarea id="q" placeholder="Ask a question… (e.g. “Who is riding Houla Cove?” or “Explain ‘ev ch til drvn’”)"></textarea>
-
-        <div class="row">
-          <button class="btn primary" id="askBtn" type="button">Ask</button>
-          <button class="btn voice" id="micBtn" type="button">🎙️ Voice</button>
+    <!-- Optional typed ask + future mic -->
+    <div class="card">
+      <div class="row">
+        <div>
+          <label for="typedAsk">Type a question (optional)</label>
+          <input id="typedAsk" type="text" inputmode="text" autocomplete="off"
+            placeholder="E.g. ‘Who is the favourite?’ or ‘What does this colour mean?’" />
+          <div class="srOnly" id="typedHelp">Type your question then press Speak answer.</div>
         </div>
 
-        <div class="row">
-          <button class="btn subtle" id="readBtn" type="button">🔊 Read this aloud</button>
-          <button class="btn subtle" id="clearBtn" type="button">Clear</button>
-        </div>
-
-        <div class="chips" id="listenChips" style="display:none;">
-          <div class="chip mist" id="listenStatus">Listening…</div>
-        </div>
-
-        <div class="row" style="margin-top:6px;">
-          <button class="btn subtle" id="readAnswerToggle" type="button" aria-pressed="false">
-            🔈 Read answers aloud: Off
+        <div style="align-self:end; display:grid; gap:10px;">
+          <button id="speakBtn" class="btn btnSoft" type="button">
+            Speak answer (calm)
           </button>
-          <div></div>
+          <button id="micBtn" class="btn btnMic" type="button" aria-describedby="micNote">
+            Future voice input (mock)
+          </button>
         </div>
       </div>
 
-      <div class="answer" aria-live="polite" aria-label="Answer area">
-        <h2>Response</h2>
-        <div class="answerBox">
-          <div id="answerText">Ask a question to see a response here.</div>
-          <div class="hint" id="answerHint">Tip: “What does X mean?” is a brilliant format for racing abbreviations.</div>
-        </div>
-      </div>
-    </section>
+      <p id="micNote" class="sub" style="margin:10px 0 0 0">
+        Voice input isn’t active yet. This button demonstrates the flow and wording we’ll keep.
+      </p>
+    </div>
 
-    <footer>
-      This page is designed to stay calm. One card. One question. One clear answer.
-    </footer>
-  </main>
+    <!-- Output -->
+    <div class="card" aria-live="polite" aria-atomic="true">
+      <div class="outputTitle">Answer</div>
+      <p id="answer" class="answer">
+        Tap <strong>ASK</strong> to begin. The companion will speak first, and show a gentle written echo after.
+      </p>
+
+      <div class="meta">
+        <div><strong>Mode:</strong> <span id="mode">Audio-first</span></div>
+        <div><strong>Reinforcement:</strong> <span id="reinforce">Written whisper echo</span></div>
+        <div><strong>Status:</strong> <span id="status">Ready</span></div>
+      </div>
+    </div>
+
+    <!-- Protected wording -->
+    <div class="card">
+      <details>
+        <summary>Protected wording (kept calm by design)</summary>
+        <p class="protected">
+          This companion avoids urgency, judgement, and loud instruction.
+          It uses short, steady phrasing and will never say “must”, “wrong”, or “obvious”.
+          <br><br>
+          When we add real voice input later, we’ll keep the same flow:
+          <code>listen → confirm quietly → speak → show a soft echo</code>.
+        </p>
+      </details>
+    </div>
+  </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // Orientation from URL params (future QR)
-      const params = new URLSearchParams(location.search);
-      const mode  = params.get("mode")  || "Racing";
-      const card  = params.get("card")  || "Gate Card";
-      const focus = params.get("focus") || "This race";
+    // --- Calm speech helpers (audio-first behaviour) ---
+    const ttsAvailable = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
 
-      document.getElementById("modeValue").textContent  = mode;
-      document.getElementById("cardValue").textContent  = card;
-      document.getElementById("focusValue").textContent = focus;
+    function calmSpeak(text){
+      const status = document.getElementById("status");
+      status.textContent = ttsAvailable ? "Speaking" : "Speech not available (text only)";
 
-      // Elements
-      const q = document.getElementById("q");
-      const askBtn = document.getElementById("askBtn");
-      const micBtn = document.getElementById("micBtn");
-      const readBtn = document.getElementById("readBtn");
-      const clearBtn = document.getElementById("clearBtn");
-      const answerText = document.getElementById("answerText");
-      const answerHint = document.getElementById("answerHint");
-      const listenChips = document.getElementById("listenChips");
-      const listenStatus = document.getElementById("listenStatus");
-      const readAnswerToggle = document.getElementById("readAnswerToggle");
+      // Always update the written echo (visual whisper reinforcement)
+      setAnswer(text);
 
-      q.focus();
+      if(!ttsAvailable) return;
 
-      // Speech output
-      function speak(text) {
-        if (!("speechSynthesis" in window)) return;
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.rate = 0.95;
-        u.pitch = 1.0;
-        u.volume = 0.85;
-        window.speechSynthesis.speak(u);
+      // Stop any previous speech
+      window.speechSynthesis.cancel();
+
+      const u = new SpeechSynthesisUtterance(text);
+
+      // Default voice settings kept neutral; user device decides voice.
+      // Keep it gentle: slightly slower, slightly lower pitch.
+      u.rate = 0.95;
+      u.pitch = 0.95;
+      u.volume = 1;
+
+      u.onend = () => { status.textContent = "Ready"; };
+      u.onerror = () => { status.textContent = "Speech error (text shown)"; };
+
+      window.speechSynthesis.speak(u);
+    }
+
+    function setAnswer(text){
+      const a = document.getElementById("answer");
+      a.textContent = text;
+    }
+
+    // --- Mocked "brain" for now (swap later for your real Q&A / data lookups) ---
+    // This is deliberately calm, orienting, and non-judgemental.
+    function generateCalmAnswer(question){
+      const q = (question || "").trim().toLowerCase();
+
+      // Orientation first, always.
+      const orientation = "You’re in the Ask companion. I can speak answers and show a quiet written echo. You can tap a whisper prompt, or type a question.";
+
+      if(!q){
+        return orientation + " What would you like to know — the colours, the course, or the next step?";
       }
 
-      // Tiny “connected / captured” bleep
-      function bleep(freq = 880, duration = 0.08, volume = 0.03) {
-        try {
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (!AudioCtx) return;
-          const ctx = new AudioCtx();
-
-          const o = ctx.createOscillator();
-          const g = ctx.createGain();
-
-          o.type = "sine";
-          o.frequency.value = freq;
-          g.gain.value = volume;
-
-          o.connect(g);
-          g.connect(ctx.destination);
-
-          o.start();
-          setTimeout(() => {
-            o.stop();
-            ctx.close();
-          }, duration * 1000);
-        } catch (e) {
-          // ignore if blocked
-        }
+      // Soft pattern matches (keep these small and safe; expand later)
+      if(q.includes("where am i") || q.includes("orientation") || q.includes("look for first")){
+        return "Start with one calm landmark: find the main title at the top of the page. Then choose a whisper prompt. If this is on a racecard, look for the horse name, number, and colours first — that’s enough to begin.";
       }
 
-      // Polite: touching cancels speech
-      document.addEventListener("touchstart", () => {
-        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-      }, { passive: true });
-
-      // Read answers aloud toggle (remembered)
-      let readAnswersAloud = localStorage.getItem("readAnswersAloud") === "true";
-
-      function updateReadToggle() {
-        readAnswerToggle.textContent = readAnswersAloud
-          ? "🔊 Read answers aloud: On"
-          : "🔈 Read answers aloud: Off";
-        readAnswerToggle.setAttribute("aria-pressed", String(readAnswersAloud));
-      }
-      updateReadToggle();
-
-      // Events (kept very simple for iPad reliability)
-      readAnswerToggle.addEventListener("click", () => {
-        readAnswersAloud = !readAnswersAloud;
-        localStorage.setItem("readAnswersAloud", String(readAnswersAloud));
-        updateReadToggle();
-        if (readAnswersAloud) speak("Answers will now be read aloud.");
-      });
-
-      readBtn.addEventListener("click", () => {
-        speak(`You are on the Ask page for ${mode}. Card: ${card}. Focus: ${focus}. Ask one clear question at a time.`);
-      });
-
-      clearBtn.addEventListener("click", () => {
-        q.value = "";
-        q.focus();
-        answerText.textContent = "Ask a question to see a response here.";
-        answerHint.textContent = "Tip: “What does X mean?” is a brilliant format for racing abbreviations.";
-      });
-
-      // Mock answer (placeholder)
-      function mockAnswer(question) {
-        const normalized = question.toLowerCase();
-        if (normalized.includes("ev ch") || normalized.includes("drvn") || normalized.includes("one pce")) {
-          return "That looks like race-reading shorthand. A calm expansion could be: even ground; chased; until driven; and one-paced three out.";
-        }
-        if (normalized.includes("who is riding")) {
-          return "Mock mode: rider lookup not connected yet. When connected, I’ll return the declared rider for that runner.";
-        }
-        if (normalized.includes("irish") || normalized.includes("bred")) {
-          return "Racing phrasing: ‘bred in Ireland’ is usually the clean wording. ‘Irish-bred’ can be used too, but ‘bred in Ireland’ is safest and clearest.";
-        }
-        if (mode.toLowerCase().includes("show")) {
-          return "Showing answers should be ring-first: class, judge, rules, and what ‘champion / reserve’ means in that schedule. (Mock mode: schedule lookup not connected yet.)";
-        }
-        return "Mock response: Ask about runners, colours, breeding, form, abbreviations, or “what does this mean?”.";
+      if(q.includes("what is this") || q.includes("what can i ask")){
+        return "This is a calm Q&A layer linked from a QR code. You can ask for colours, simple explanations, or what to do next. It is designed to help without flooding you with detail.";
       }
 
-      function handleAsk() {
-        const question = q.value.trim();
-        if (!question) {
-          answerText.textContent = "Type a question first (or use iPad dictation in the box).";
-          answerHint.textContent = "Try: “Who is riding…?” or “What does … mean?”";
-          if (readAnswersAloud) speak("Please type a question first.");
-          return;
-        }
-        const a = mockAnswer(question);
-        answerText.textContent = a;
-        answerHint.textContent = "If you want it shorter, ask: “Answer in one line.”";
-        if (readAnswersAloud) speak(a);
+      if(q.includes("colour") || q.includes("colors") || q.includes("cap") || q.includes("sleeve")){
+        return "Colours are described in a consistent order: cap, body, sleeves. They help you spot the right horse or rider. If you tell me a colour line, I can repeat it clearly and explain any tricky phrasing.";
       }
 
-      // Ask button (simple & reliable)
-      askBtn.addEventListener("click", handleAsk);
-
-      // Enter submits (iPad: Shift+Enter = new line)
-      q.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();
-          handleAsk();
-        }
-      });
-
-      // Voice input: real speech recognition where supported, iPad fallback guidance
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      let recognizer = null;
-      let isListening = false;
-
-      function setListeningUI(on, message) {
-        if (on) {
-          listenChips.style.display = "flex";
-          listenStatus.textContent = message || "Listening…";
-          micBtn.textContent = "⏹ Stop listening";
-        } else {
-          listenChips.style.display = "none";
-          micBtn.textContent = "🎙️ Voice";
-        }
+      if(q.includes("next") || q.includes("what do i do") || q.includes("practical")){
+        return "Choose one small action: pick one horse or one class entry and ask about it. If you’re at the venue, decide your nearest landmark next — paddock, ring, collecting area, or finish line — and I can guide you from there.";
       }
 
-      function startListening() {
-        if (!SpeechRecognition) {
-          setListeningUI(true, "iPad: tap the box, then use the keyboard mic.");
-          micBtn.textContent = "🎙️ Dictation (iPad)";
-          q.focus();
-          q.scrollIntoView({ behavior: "smooth", block: "center" });
-
-          if (!q.value.trim()) {
-            q.value = "Use the keyboard mic to dictate your question…";
-          }
-
-          setTimeout(() => {
-            setListeningUI(false);
-            micBtn.textContent = "🎙️ Voice";
-          }, 2200);
-          return;
-        }
-
-        if (!recognizer) {
-          recognizer = new SpeechRecognition();
-          recognizer.lang = "en-GB";
-          recognizer.interimResults = true;
-          recognizer.continuous = false;
-
-          recognizer.onstart = () => {
-            isListening = true;
-            bleep(880); // connected
-            setListeningUI(true, "Listening…");
-          };
-
-          recognizer.onerror = () => {
-            isListening = false;
-            setListeningUI(true, "Couldn’t hear that — try again.");
-            setTimeout(() => setListeningUI(false), 1600);
-          };
-
-          recognizer.onend = () => {
-            isListening = false;
-            setListeningUI(false);
-          };
-
-          recognizer.onresult = (event) => {
-            let finalText = "";
-            let interimText = "";
-
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-              const res = event.results[i];
-              const txt = res[0].transcript;
-              if (res.isFinal) finalText += txt;
-              else interimText += txt;
-            }
-
-            q.value = (finalText || interimText).trim();
-            q.focus();
-
-            if (finalText) {
-              bleep(660, 0.07); // captured
-              setListeningUI(true, "Captured. Tap Ask when ready.");
-              setTimeout(() => setListeningUI(false), 1400);
-            }
-          };
-        }
-
-        try { recognizer.start(); } catch (e) {}
+      if(q.includes("summary") || q.includes("context")){
+        return "Here’s a quiet summary: this companion exists to reduce searching and help you stay oriented. It will prioritise calm explanation first, and only add detail if you ask for it.";
       }
 
-      function stopListening() {
-        if (recognizer && isListening) recognizer.stop();
-      }
+      // Default: acknowledge gently, offer next step
+      return orientation + " Your question was: “" + question.trim() + "”. If you want, rephrase it as one of these: who, what, where, or explain.";
+    }
 
-      micBtn.addEventListener("click", () => {
-        if (isListening) stopListening();
-        else startListening();
+    // --- Wiring ---
+    const askButton = document.getElementById("askButton");
+    const speakBtn = document.getElementById("speakBtn");
+    const micBtn = document.getElementById("micBtn");
+    const typedAsk = document.getElementById("typedAsk");
+    const statusEl = document.getElementById("status");
+
+    // Primary ASK: speak a calm orientation + invitation
+    askButton.addEventListener("click", () => {
+      statusEl.textContent = "Thinking";
+      const answer = generateCalmAnswer("");
+      calmSpeak(answer);
+    });
+
+    // Speak typed ask
+    speakBtn.addEventListener("click", () => {
+      statusEl.textContent = "Thinking";
+      const q = typedAsk.value || "";
+      const answer = generateCalmAnswer(q);
+      calmSpeak(answer);
+    });
+
+    // Enter key in input triggers speak
+    typedAsk.addEventListener("keydown", (e) => {
+      if(e.key === "Enter"){
+        e.preventDefault();
+        speakBtn.click();
+      }
+    });
+
+    // Whisper chips
+    document.querySelectorAll(".chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        statusEl.textContent = "Thinking";
+        const q = btn.getAttribute("data-q") || "";
+        typedAsk.value = q; // gentle reinforcement: shows what was asked
+        const answer = generateCalmAnswer(q);
+        calmSpeak(answer);
       });
     });
+
+    // Future voice input (mock flow)
+    micBtn.addEventListener("click", () => {
+      // This is where we’ll later add Web Speech API or another voice input method.
+      // For now we keep the behavioural pattern and protected wording.
+      const mock = "Voice input will be added later. For now, you can tap a whisper prompt or type a short question, then choose Speak answer.";
+      calmSpeak(mock);
+    });
+
+    // Initial status
+    document.getElementById("mode").textContent = ttsAvailable ? "Audio-first (TTS available)" : "Text-first (no TTS)";
   </script>
 </body>
 </html>
