@@ -1,240 +1,463 @@
-<script>
-  // --- Calm speech helpers (audio-first behaviour) ---
-  const ttsAvailable = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ask — Calm QR Companion</title>
 
-  function calmSpeak(text){
-    const status = document.getElementById("status");
-    status.textContent = ttsAvailable ? "Speaking" : "Speech not available (text only)";
+  <style>
+    :root{
+      --bg: #f7f6f3;
+      --ink: #2b2b2b;
+      --soft: #6b6b6b;
+      --card: #ffffff;
+      --line: #e3e1db;
 
-    // Always update the written echo (visual whisper reinforcement)
-    setAnswer(text);
+      --celadon: #c9d5d0;
+      --celadon-ink: #2e3b37;
+      --mist: #d9dee1;
+      --lemon: #f3f0c7;
 
-    if(!ttsAvailable) return;
-
-    // Stop any previous speech
-    window.speechSynthesis.cancel();
-
-    const u = new SpeechSynthesisUtterance(text);
-
-    // Keep it gentle; device decides the actual voice.
-    u.rate = 0.95;
-    u.pitch = 0.95;
-    u.volume = 1;
-
-    u.onend = () => { status.textContent = "Ready"; };
-    u.onerror = () => { status.textContent = "Speech error (text shown)"; };
-
-    window.speechSynthesis.speak(u);
-  }
-
-  function setAnswer(text){
-    const a = document.getElementById("answer");
-    a.textContent = text;
-  }
-
-  // --- Data stores (CSV) ---
-  let LEGENDS = [];
-  let GATECARD = [];
-  let INDEX_BY_NO = new Map();
-  let INDEX_BY_NAME = new Map();
-
-  function clean(s){ return (s || "").toString().trim(); }
-  function lower(s){ return clean(s).toLowerCase(); }
-
-  // Simple CSV parser (supports quoted commas)
-  function parseCSV(text){
-    const rows = [];
-    let row = [];
-    let cur = "";
-    let inQuotes = false;
-
-    for(let i=0; i<text.length; i++){
-      const ch = text[i];
-      const next = text[i+1];
-
-      if(ch === '"' && inQuotes && next === '"'){ cur += '"'; i++; continue; }
-      if(ch === '"'){ inQuotes = !inQuotes; continue; }
-
-      if(ch === "," && !inQuotes){ row.push(cur); cur = ""; continue; }
-
-      if((ch === "\n" || ch === "\r") && !inQuotes){
-        if(ch === "\r" && next === "\n") i++;
-        row.push(cur);
-        if(row.some(c => clean(c) !== "")) rows.push(row);
-        row = []; cur = ""; continue;
-      }
-
-      cur += ch;
+      --radius: 18px;
+      --shadow: 0 6px 18px rgba(0,0,0,0.06);
+      --focus: 0 0 0 4px rgba(201, 213, 208, 0.85);
     }
 
-    row.push(cur);
-    if(row.some(c => clean(c) !== "")) rows.push(row);
-
-    if(rows.length === 0) return [];
-
-    const headers = rows[0].map(h => lower(h));
-    const out = [];
-
-    for(let r=1; r<rows.length; r++){
-      const obj = {};
-      for(let c=0; c<headers.length; c++){
-        obj[headers[c]] = clean(rows[r][c] ?? "");
-      }
-      out.push(obj);
+    *{ box-sizing: border-box; }
+    body{
+      margin: 0;
+      font-family: Georgia, "Times New Roman", Times, serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.6;
+      padding: 16px;
     }
-    return out;
-  }
 
-  async function loadData(){
+    .wrap{ max-width: 760px; margin: 0 auto; }
+    header{ margin: 6px 0 14px 0; }
+    h1{
+      font-size: 1.35rem;
+      margin: 8px 0 6px 0;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .sub{ margin: 0; color: var(--soft); font-size: 0.98rem; }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      margin: 12px 0;
+    }
+
+    .askButton{
+      display: grid;
+      gap: 8px;
+      align-items: center;
+      justify-items: center;
+
+      width: 100%;
+      min-height: 120px;
+      padding: 18px;
+
+      border-radius: 22px;
+      border: 2px solid var(--celadon);
+      background: linear-gradient(180deg, rgba(201,213,208,0.30), rgba(201,213,208,0.12));
+      color: var(--celadon-ink);
+
+      font: inherit;
+      cursor: pointer;
+      user-select: none;
+    }
+    .askButton:focus{ outline: none; box-shadow: var(--focus); }
+    .askBig{ font-size: 2.1rem; letter-spacing: 1px; font-weight: 700; line-height: 1.1; }
+    .askHint{ font-size: 1rem; color: rgba(46,59,55,0.85); text-align: center; max-width: 42ch; }
+
+    .row{ display: grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 680px){ .row{ grid-template-columns: 1fr 1fr; } }
+
+    .btn{
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      cursor: pointer;
+    }
+    .btn:focus{ outline: none; box-shadow: var(--focus); }
+
+    .btnSoft{
+      background: linear-gradient(180deg, rgba(243,240,199,0.45), rgba(243,240,199,0.15));
+      border-color: rgba(227,225,219,1);
+    }
+    .btnMic{
+      border: 1px dashed rgba(107,107,107,0.55);
+      background: linear-gradient(180deg, rgba(217,222,225,0.35), rgba(217,222,225,0.10));
+      color: #3a3a3a;
+    }
+
+    .chips{ display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 2px 0; }
+    .chip{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--soft);
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.98rem;
+    }
+    .chip:focus{ outline: none; box-shadow: var(--focus); }
+    .dot{
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--celadon);
+      box-shadow: 0 0 0 3px rgba(201,213,208,0.25);
+    }
+
+    .outputTitle{ margin: 0 0 6px 0; font-weight: 700; }
+    .answer{ margin: 0; font-size: 1.05rem; }
+    .meta{
+      margin: 10px 0 0 0;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      color: var(--soft);
+      font-size: 0.95rem;
+      display: grid;
+      gap: 4px;
+    }
+
+    details{
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(201,213,208,0.12);
+      padding: 10px 12px;
+    }
+    details summary{
+      cursor: pointer;
+      color: var(--celadon-ink);
+      font-weight: 700;
+      list-style: none;
+    }
+    details summary::-webkit-details-marker{ display: none; }
+    .protected{ margin: 10px 0 0 0; color: #3a3a3a; font-size: 0.98rem; }
+    .protected code{
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--line);
+      padding: 0 6px;
+      border-radius: 8px;
+    }
+
+    label{ display: block; font-weight: 700; margin: 0 0 6px 0; }
+    input[type="text"]{
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      font: inherit;
+      background: #fff;
+      color: var(--ink);
+    }
+    input[type="text"]:focus{ outline: none; box-shadow: var(--focus); }
+
+    .srOnly{
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Ask — Calm QR Companion</h1>
+      <p class="sub">Audio-first answers with quiet visual reinforcement. Designed to be read aloud calmly.</p>
+    </header>
+
+    <button id="askButton" class="askButton" type="button" aria-describedby="askHint">
+      <div class="askBig">ASK</div>
+      <div id="askHint" class="askHint">
+        Tap once for a calm spoken answer. If you prefer, choose a whisper prompt below.
+      </div>
+    </button>
+
+    <div class="card" aria-label="Whisper reinforcement">
+      <div class="outputTitle">Whisper prompts</div>
+      <p class="sub" style="margin-top:0">These are gentle “quick asks” — designed to guide without shouting.</p>
+
+      <div class="chips" role="list">
+        <button class="chip" type="button" data-q="Where am I? What should I look for first?"><span class="dot" aria-hidden="true"></span> Calm orientation</button>
+        <button class="chip" type="button" data-q="What is this card? What can I ask it?"><span class="dot" aria-hidden="true"></span> What is this?</button>
+        <button class="chip" type="button" data-q="Explain the colours and the cap/body/sleeves quietly."><span class="dot" aria-hidden="true"></span> Colours help</button>
+        <button class="chip" type="button" data-q="Tell me the next practical thing to do here."><span class="dot" aria-hidden="true"></span> Next step</button>
+        <button class="chip" type="button" data-q="Give me a short, calm summary of the race/showing context."><span class="dot" aria-hidden="true"></span> Quiet summary</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <label for="typedAsk">Type a question (optional)</label>
+          <input id="typedAsk" type="text" inputmode="text" autocomplete="off"
+                 placeholder="E.g. ‘what does GS mean’ or ‘horse 2 colours’" />
+          <div class="srOnly" id="typedHelp">Type your question then press Speak answer.</div>
+        </div>
+
+        <div style="align-self:end; display:grid; gap:10px;">
+          <button id="speakBtn" class="btn btnSoft" type="button">Speak answer (calm)</button>
+          <button id="micBtn" class="btn btnMic" type="button" aria-describedby="micNote">Future voice input (mock)</button>
+        </div>
+      </div>
+
+      <p id="micNote" class="sub" style="margin:10px 0 0 0">
+        Voice input isn’t active yet. This button demonstrates the flow and wording we’ll keep.
+      </p>
+    </div>
+
+    <div class="card" aria-live="polite" aria-atomic="true">
+      <div class="outputTitle">Answer</div>
+      <p id="answer" class="answer">Tap <strong>ASK</strong> to begin.</p>
+
+      <div class="meta">
+        <div><strong>Mode:</strong> <span id="mode">Audio-first</span></div>
+        <div><strong>Reinforcement:</strong> <span id="reinforce">Written whisper echo</span></div>
+        <div><strong>Status:</strong> <span id="status">Ready</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <details>
+        <summary>Protected wording (kept calm by design)</summary>
+        <p class="protected">
+          This companion avoids urgency, judgement, and loud instruction.
+          It uses short, steady phrasing and will never say “must”, “wrong”, or “obvious”.
+          <br><br>
+          When we add real voice input later, we’ll keep the same flow:
+          <code>listen → confirm quietly → speak → show a soft echo</code>.
+        </p>
+      </details>
+    </div>
+  </div>
+
+  <script>
+    // --- Calm speech helpers ---
+    const ttsAvailable = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+
+    function setAnswer(text){
+      document.getElementById("answer").textContent = text;
+    }
+
+    function calmSpeak(text){
+      const status = document.getElementById("status");
+      status.textContent = ttsAvailable ? "Speaking" : "Speech not available (text only)";
+      setAnswer(text);
+
+      if(!ttsAvailable) return;
+      window.speechSynthesis.cancel();
+
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.95;
+      u.pitch = 0.95;
+      u.volume = 1;
+      u.onend = () => { status.textContent = "Ready"; };
+      u.onerror = () => { status.textContent = "Speech error (text shown)"; };
+      window.speechSynthesis.speak(u);
+    }
+
+    // --- CSV data ---
+    let LEGENDS = [];
+    let GATECARD = [];
+    let INDEX_BY_NO = new Map();
+    let INDEX_BY_NAME = new Map();
+
+    function clean(s){ return (s || "").toString().trim(); }
+    function lower(s){ return clean(s).toLowerCase(); }
+
+    function parseCSV(text){
+      const rows = [];
+      let row = [];
+      let cur = "";
+      let inQuotes = false;
+
+      for(let i=0; i<text.length; i++){
+        const ch = text[i], next = text[i+1];
+        if(ch === '"' && inQuotes && next === '"'){ cur += '"'; i++; continue; }
+        if(ch === '"'){ inQuotes = !inQuotes; continue; }
+        if(ch === "," && !inQuotes){ row.push(cur); cur = ""; continue; }
+
+        if((ch === "\n" || ch === "\r") && !inQuotes){
+          if(ch === "\r" && next === "\n") i++;
+          row.push(cur);
+          if(row.some(c => clean(c) !== "")) rows.push(row);
+          row = []; cur = ""; continue;
+        }
+        cur += ch;
+      }
+      row.push(cur);
+      if(row.some(c => clean(c) !== "")) rows.push(row);
+      if(rows.length === 0) return [];
+
+      const headers = rows[0].map(h => lower(h));
+      const out = [];
+      for(let r=1; r<rows.length; r++){
+        const obj = {};
+        for(let c=0; c<headers.length; c++) obj[headers[c]] = clean(rows[r][c] ?? "");
+        out.push(obj);
+      }
+      return out;
+    }
+
+    async function loadData(){
+      const statusEl = document.getElementById("status");
+      try{
+        statusEl.textContent = "Loading data";
+        const [legTxt, gateTxt] = await Promise.all([
+          fetch("legends.csv", { cache: "no-store" }).then(r => r.ok ? r.text() : ""),
+          fetch("gatecard.csv", { cache: "no-store" }).then(r => r.ok ? r.text() : "")
+        ]);
+
+        LEGENDS = legTxt ? parseCSV(legTxt) : [];
+        GATECARD = gateTxt ? parseCSV(gateTxt) : [];
+
+        INDEX_BY_NO.clear();
+        INDEX_BY_NAME.clear();
+        GATECARD.forEach(row => {
+          const no = clean(row.horse_no);
+          const nm = lower(row.horse_name);
+          if(no) INDEX_BY_NO.set(no, row);
+          if(nm) INDEX_BY_NAME.set(nm, row);
+        });
+
+        statusEl.textContent = "Ready";
+      }catch(e){
+        statusEl.textContent = "Ready (data not loaded)";
+      }
+    }
+
+    function findLegend(term){
+      const t = lower(term);
+      if(!t) return null;
+      return LEGENDS.find(x => lower(x.term) === t) || null;
+    }
+
+    function findHorseFromQuestion(q){
+      const m = q.match(/(?:horse\s*)?#?(\d{1,2})\b/);
+      if(m && INDEX_BY_NO.has(m[1])) return INDEX_BY_NO.get(m[1]);
+
+      for(const [nm, row] of INDEX_BY_NAME.entries()){
+        if(q.includes(nm)) return row;
+      }
+      return null;
+    }
+
+    function generateCalmAnswer(question){
+      const raw = clean(question);
+      const q = lower(raw);
+
+      const orientation =
+        "You’re in the Ask companion. I can speak answers and show a quiet written echo. " +
+        "You can tap a whisper prompt, or type a short question.";
+
+      if(!q) return orientation + " What would you like to know — colours, going, or a short summary?";
+
+      const meanMatch = q.match(/what does (.+) mean\??/);
+      if(meanMatch){
+        const term = clean(meanMatch[1]).replace(/[.?!]$/,"");
+        const hit = findLegend(term);
+        if(hit) return `${hit.term}. ${hit.meaning}.`;
+        return "I don’t have that term saved yet. If you add it to legends.csv, I’ll learn it.";
+      }
+
+      if(q.includes("colour") || q.includes("color") || q.includes("cap") || q.includes("sleeve") || q.includes("silk")){
+        const horse = findHorseFromQuestion(q);
+        if(horse){
+          const cap = clean(horse.cap) || "not set";
+          const body = clean(horse.body) || "not set";
+          const sleeves = clean(horse.sleeves) || "not set";
+          return `Colours are read as cap, body, sleeves. For ${horse.horse_name}: cap ${cap}, body ${body}, sleeves ${sleeves}.`;
+        }
+        return "If you tell me the horse number or name, I can read the colours as cap, body, sleeves.";
+      }
+
+      if(q.includes("going")){
+        const horse = findHorseFromQuestion(q);
+        if(horse && clean(horse.going)){
+          const g = clean(horse.going);
+          const hit = findLegend(g);
+          return hit ? `Going is ${hit.meaning} (${g}).` : `Going is ${g}.`;
+        }
+        return "If you tell me the horse number, I can read the going saved on this card.";
+      }
+
+      if(q.includes("summary") || q.includes("notes") || q.includes("tell me about")){
+        const horse = findHorseFromQuestion(q);
+        if(horse){
+          const bits = [];
+          bits.push(`${horse.horse_name}.`);
+          if(clean(horse.age) || clean(horse.sex)) bits.push(`Age/sex: ${clean(horse.age)} ${clean(horse.sex)}.`.trim());
+          if(clean(horse.trainer)) bits.push(`Trainer: ${horse.trainer}.`);
+          if(clean(horse.jockey)) bits.push(`Jockey: ${horse.jockey}.`);
+          if(clean(horse.notes)) bits.push(`Notes: ${horse.notes}`);
+          return bits.join(" ");
+        }
+        return "Tell me the horse number or name and I’ll give a short, calm summary.";
+      }
+
+      return orientation + " For data answers, include a horse number (like ‘horse 2’) or ask what a term means.";
+    }
+
+    // --- Wiring ---
+    const askButton = document.getElementById("askButton");
+    const speakBtn = document.getElementById("speakBtn");
+    const micBtn = document.getElementById("micBtn");
+    const typedAsk = document.getElementById("typedAsk");
     const statusEl = document.getElementById("status");
-    try{
-      statusEl.textContent = "Loading data";
 
-      const [legTxt, gateTxt] = await Promise.all([
-        fetch("legends.csv", { cache: "no-store" }).then(r => r.ok ? r.text() : ""),
-        fetch("gatecard.csv", { cache: "no-store" }).then(r => r.ok ? r.text() : "")
-      ]);
-
-      LEGENDS = legTxt ? parseCSV(legTxt) : [];
-      GATECARD = gateTxt ? parseCSV(gateTxt) : [];
-
-      INDEX_BY_NO.clear();
-      INDEX_BY_NAME.clear();
-
-      GATECARD.forEach(row => {
-        const no = clean(row.horse_no);
-        const nm = lower(row.horse_name);
-        if(no) INDEX_BY_NO.set(no, row);
-        if(nm) INDEX_BY_NAME.set(nm, row);
-      });
-
-      statusEl.textContent = "Ready";
-    }catch(e){
-      statusEl.textContent = "Ready (data not loaded)";
-    }
-  }
-
-  function findLegend(term){
-    const t = lower(term);
-    if(!t) return null;
-    return LEGENDS.find(x => lower(x.term) === t) || null;
-  }
-
-  function findHorseFromQuestion(q){
-    // Try: "horse 2", "#2", "2"
-    const m = q.match(/(?:horse\s*)?#?(\d{1,2})\b/);
-    if(m && INDEX_BY_NO.has(m[1])) return INDEX_BY_NO.get(m[1]);
-
-    // Try matching horse name by containment
-    for(const [nm, row] of INDEX_BY_NAME.entries()){
-      if(q.includes(nm)) return row;
-    }
-    return null;
-  }
-
-  // --- CSV-powered "brain" (calm, short, usable aloud) ---
-  function generateCalmAnswer(question){
-    const raw = clean(question);
-    const q = lower(raw);
-
-    const orientation =
-      "You’re in the Ask companion. I can speak answers and show a quiet written echo. " +
-      "You can tap a whisper prompt, or type a short question.";
-
-    if(!q){
-      return orientation + " What would you like to know — colours, going, or a short summary?";
-    }
-
-    // “what does X mean”
-    const meanMatch = q.match(/what does (.+) mean\??/);
-    if(meanMatch){
-      const term = clean(meanMatch[1]).replace(/[.?!]$/,"");
-      const hit = findLegend(term);
-      if(hit) return `${hit.term}. ${hit.meaning}.`;
-      return "I don’t have that term saved yet. If you add it to legends.csv, I’ll learn it.";
-    }
-
-    // Colours
-    if(q.includes("colour") || q.includes("color") || q.includes("cap") || q.includes("sleeve") || q.includes("silk")){
-      const horse = findHorseFromQuestion(q);
-      if(horse){
-        const cap = clean(horse.cap) || "not set";
-        const body = clean(horse.body) || "not set";
-        const sleeves = clean(horse.sleeves) || "not set";
-        return `Colours are read as cap, body, sleeves. For ${horse.horse_name}: cap ${cap}, body ${body}, sleeves ${sleeves}.`;
-      }
-      return "If you tell me the horse number or name, I can read the colours as cap, body, sleeves.";
-    }
-
-    // Going
-    if(q.includes("going")){
-      const horse = findHorseFromQuestion(q);
-      if(horse && clean(horse.going)){
-        const g = clean(horse.going);
-        const hit = findLegend(g);
-        return hit ? `Going is ${hit.meaning} (${g}).` : `Going is ${g}.`;
-      }
-      return "If you tell me the horse number, I can read the going saved on this card.";
-    }
-
-    // Summary / notes
-    if(q.includes("summary") || q.includes("notes") || q.includes("tell me about")){
-      const horse = findHorseFromQuestion(q);
-      if(horse){
-        const bits = [];
-        bits.push(`${horse.horse_name}.`);
-        if(clean(horse.age) || clean(horse.sex)) bits.push(`Age/sex: ${clean(horse.age)} ${clean(horse.sex)}.`.trim());
-        if(clean(horse.trainer)) bits.push(`Trainer: ${horse.trainer}.`);
-        if(clean(horse.jockey)) bits.push(`Jockey: ${horse.jockey}.`);
-        if(clean(horse.notes)) bits.push(`Notes: ${horse.notes}`);
-        return bits.join(" ");
-      }
-      return "Tell me the horse number or name and I’ll give a short, calm summary.";
-    }
-
-    return orientation + " For data answers, include a horse number (like ‘horse 2’) or ask what a term means.";
-  }
-
-  // --- Wiring ---
-  const askButton = document.getElementById("askButton");
-  const speakBtn = document.getElementById("speakBtn");
-  const micBtn = document.getElementById("micBtn");
-  const typedAsk = document.getElementById("typedAsk");
-  const statusEl = document.getElementById("status");
-
-  askButton.addEventListener("click", () => {
-    statusEl.textContent = "Thinking";
-    calmSpeak(generateCalmAnswer(""));
-  });
-
-  speakBtn.addEventListener("click", () => {
-    statusEl.textContent = "Thinking";
-    calmSpeak(generateCalmAnswer(typedAsk.value || ""));
-  });
-
-  typedAsk.addEventListener("keydown", (e) => {
-    if(e.key === "Enter"){
-      e.preventDefault();
-      speakBtn.click();
-    }
-  });
-
-  document.querySelectorAll(".chip").forEach(btn => {
-    btn.addEventListener("click", () => {
+    askButton.addEventListener("click", () => {
       statusEl.textContent = "Thinking";
-      const q = btn.getAttribute("data-q") || "";
-      typedAsk.value = q;
-      calmSpeak(generateCalmAnswer(q));
+      calmSpeak(generateCalmAnswer(""));
     });
-  });
 
-  micBtn.addEventListener("click", () => {
-    calmSpeak("Voice input will be added later. For now, you can tap a whisper prompt or type a short question, then choose Speak answer.");
-  });
+    speakBtn.addEventListener("click", () => {
+      statusEl.textContent = "Thinking";
+      calmSpeak(generateCalmAnswer(typedAsk.value || ""));
+    });
 
-  // Load CSV data once
-  loadData();
+    typedAsk.addEventListener("keydown", (e) => {
+      if(e.key === "Enter"){
+        e.preventDefault();
+        speakBtn.click();
+      }
+    });
 
-  // Initial status
-  document.getElementById("mode").textContent = ttsAvailable ? "Audio-first (TTS available)" : "Text-first (no TTS)";
-</script>
+    document.querySelectorAll(".chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        statusEl.textContent = "Thinking";
+        const q = btn.getAttribute("data-q") || "";
+        typedAsk.value = q;
+        calmSpeak(generateCalmAnswer(q));
+      });
+    });
+
+    micBtn.addEventListener("click", () => {
+      calmSpeak("Voice input will be added later. For now, you can tap a whisper prompt or type a short question, then choose Speak answer.");
+    });
+
+    loadData();
+    document.getElementById("mode").textContent = ttsAvailable ? "Audio-first (TTS available)" : "Text-first (no TTS)";
+  </script>
+</body>
+</html>
