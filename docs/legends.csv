@@ -1,0 +1,19 @@
+key,type,label,speak,notes
+cap,type,Cap,Cap,Order for colours: cap, body, sleeves
+body,type,Body,Body,
+sleeves,type,Sleeves,Sleeves,
+br,abbr,Bred (GB/IRE/FR),bred,Used in breeding lines
+gb,abbr,GB,Great Britain,
+ire,abbr,IRE,Ireland,
+fr,abbr,FR,France,
+g,abbr,G (going),going,Going / ground description
+gs,abbr,GS,Good to Soft,
+gd,abbr,Gd,Good,
+sft,abbr,Sft,Soft,
+hy,abbr,Hy,Heavy,
+f,abbr,F,Firm,
+hdcp,abbr,Hdcp,handicap,
+nov,abbr,Nov,novice,
+ch,abbr,Ch,challenger,Showing: “CH” might mean Champion depending on your system
+colours,help,Colours line,Colours are described in this order: cap, body, sleeves.,Calm explanation
+course,help,Course orientation,If you tell me a landmark I can help you orient gently.,For maps later
