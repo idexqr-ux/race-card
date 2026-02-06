@@ -355,6 +355,11 @@
     if(!t) return null;
     return LEGENDS.find(x => lower(x.term) === t) || null;
   }
+    function spokenName(name){
+  if(!name) return "";
+  // remove trailing numbers like " 2", " 3"
+  return name.replace(/\s+\d+$/, "");
+}
 
   function findHorseFromQuestion(q){
     const m = q.match(/(?:horse\s*)?#?(\d{1,2})\b/);
@@ -435,8 +440,8 @@
         const as = ageSexPhrase(horse.age, horse.sex);
         if(as) bits.push(`${as}.`);
 
-        if(clean(horse.trainer)) bits.push(`Trained by ${horse.trainer}.`);
-if(clean(horse.jockey)) bits.push(`Ridden by ${horse.jockey}.`);
+       if(clean(horse.trainer)) bits.push(`Trained by ${spokenName(horse.trainer)}.`);
+if(clean(horse.jockey)) bits.push(`Ridden by ${spokenName(horse.jockey)}.`);
 if(clean(horse.notes)) bits.push(`Form notes: ${horse.notes}`);
 
       }
