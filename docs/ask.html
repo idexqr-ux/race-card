@@ -385,8 +385,9 @@
         const horse = findHorseFromQuestion(q);
         if(horse){
          const cap = clean(horse.cap_colour) || "not set";
-         const body = clean(horse.body_colour) || "not set";
-         const sleeves = clean(horse.sleeves_colour) || "not set";
+const body = clean(horse.body_colour) || "not set";
+const sleeves = clean(horse.sleeves_colour) || "not set";
+
 
           return `Colours are read as cap, body, sleeves. For ${horse.horse_name}: cap ${cap}, body ${body}, sleeves ${sleeves}.`;
         }
