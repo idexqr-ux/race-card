@@ -268,13 +268,21 @@
       if(!ttsAvailable) return;
       window.speechSynthesis.cancel();
 
+      text = text.replace(/\s*\/\s*/g, " or ");
+
       const u = new SpeechSynthesisUtterance(text);
       u.rate = 0.95;
       u.pitch = 0.95;
       u.volume = 1;
       u.onend = () => { status.textContent = "Ready"; };
       u.onerror = () => { status.textContent = "Speech error (text shown)"; };
-      window.speechSynthesis.speak(u);
+      window.speechSynthesis.cancel();
+
+// soften characters that TTS reads oddly
+text = text.replace(/\s*\/\s*/g, " or ");
+
+const u = new SpeechSynthesisUtterance(text);
+
     }
 
     // --- CSV data ---
