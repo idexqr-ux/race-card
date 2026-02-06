@@ -435,10 +435,10 @@
         const as = ageSexPhrase(horse.age, horse.sex);
         if(as) bits.push(`${as}.`);
 
-        if(clean(horse.trainer)) bits.push(`Trainer: ${horse.trainer}.`);
-        if(clean(horse.jockey)) bits.push(`Jockey: ${horse.jockey}.`);
-        if(clean(horse.notes)) bits.push(`Notes: ${horse.notes}`);
-        return bits.join(" ");
+        if(clean(horse.trainer)) bits.push(`Trained by ${horse.trainer}.`);
+if(clean(horse.jockey)) bits.push(`Ridden by ${horse.jockey}.`);
+if(clean(horse.notes)) bits.push(`Form notes: ${horse.notes}`);
+
       }
       return "Tell me the horse number or name and I’ll give a short, calm summary.";
     }
