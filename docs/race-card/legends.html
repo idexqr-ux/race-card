@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Race Card Legends</title>
+
+  <style>
+    :root{
+      --bg:#f7f6f3;
+      --ink:#2b2b2b;
+      --soft:#5a5a5a;
+      --card:#ffffff;
+      --line:#e3e1db;
+      --radius:12px;
+      --shadow:0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    body{
+      margin:0;
+      font-family: Georgia, "Times New Roman", Times, serif;
+      color:var(--ink);
+      background:var(--bg);
+      line-height:1.6;
+      padding:16px;
+    }
+
+    h1{
+      font-size:1.4em;
+      margin:12px 0;
+      color:#1f1f1f;
+    }
+
+    h2{
+      font-size:1.15em;
+      margin:22px 0 10px 0;
+      color:#1f1f1f;
+      font-weight:normal;
+    }
+
+    p.lede{
+      margin:0 0 14px 0;
+      color:var(--soft);
+      max-width: 880px;
+    }
+
+    .panel{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:var(--shadow);
+      max-width: 980px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin: 0;
+    }
+
+    th, td{
+      padding:10px;
+      border-bottom:1px solid var(--line);
+      vertical-align:top;
+    }
+
+    th{
+      text-align:left;
+      font-weight:normal;
+      color:var(--soft);
+      width: 16%;
+      white-space:nowrap;
+    }
+
+    td.code{
+      width: 14%;
+      white-space:nowrap;
+      color:#2f2f2f;
+    }
+
+    td.term{
+      width: 28%;
+    }
+
+    td.explain{
+      width: 42%;
+      color:#2f2f2f;
+    }
+
+    .note{
+      color:var(--soft);
+      font-size: 0.98em;
+      margin-top: 10px;
+    }
+
+    .back{
+      display:inline-block;
+      margin-top:14px;
+      font-size:1.05em;
+      color:#6a6a6a;
+      padding:12px 8px;
+      border-radius:10px;
+      cursor:pointer;
+      -webkit-tap-highlight-color: rgba(0,0,0,0);
+      text-decoration:none;
+    }
+    .back:hover{ color:var(--ink); }
+
+    details{
+      max-width: 980px;
+      margin-top: 18px;
+    }
+    details > summary{
+      cursor:pointer;
+      color:#6a6a6a;
+      padding:10px 0;
+      list-style: none;
+    }
+    details > summary::-webkit-details-marker{ display:none; }
+    details .panel{ margin-top: 8px; }
+    ul{ margin: 0; padding-left: 18px; }
+    li{ margin: 8px 0; }
+    .tag{
+      display:inline-block;
+      font-size:0.92em;
+      letter-spacing:0.04em;
+      text-transform:uppercase;
+      color:#6a6a6a;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Race Card Legends</h1>
+  <p class="lede">
+    A calm reference for abbreviations and terms used on the race card.
+    These are expansions only — no guessing.
+  </p>
+
+  <a class="back" href="./">← Back</a>
+
+  <!-- COLOURS -->
+  <h2>Colours</h2>
+  <div class="panel">
+    <table aria-label="Colours legend">
+      <tr><th>Category</th><td class="code">b</td><td class="term">Bay</td><td class="explain">Brown body with black mane and tail</td></tr>
+      <tr><th>Category</th><td class="code">bl</td><td class="term">Black</td><td class="explain">Black body with black mane and tail</td></tr>
+      <tr><th>Category</th><td class="code">br</td><td class="term">Brown</td><td class="explain">Dark brown body, mane and tail</td></tr>
+      <tr><th>Category</th><td class="code">ch</td><td class="term">Chestnut</td><td class="explain">Reddish-brown coat; mane and tail usually the same colour</td></tr>
+      <tr><th>Category</th><td class="code">gr</td><td class="term">Grey</td><td class="explain">Coat lightens with age; often born dark</td></tr>
+      <tr><th>Category</th><td class="code">ro</td><td class="term">Roan</td><td class="explain">Mixture of white and coloured hairs</td></tr>
+      <tr><th>Category</th><td class="code">sk</td><td class="term">Skewbald</td><td class="explain">Large patches of white and brown</td></tr>
+      <tr><th>Category</th><td class="code">pb</td><td class="term">Piebald</td><td class="explain">Large patches of white and black</td></tr>
+    </table>
+  </div>
+
+  <!-- SEX -->
+  <h2>Sex</h2>
+  <div class="panel">
+    <table aria-label="Sex legend">
+      <tr><th>Category</th><td class="code">g</td><td class="term">Gelding</td><td class="explain">A male horse that has been castrated</td></tr>
+      <tr><th>Category</th><td class="code">m</td><td class="term">Mare</td><td class="explain">An adult female horse</td></tr>
+      <tr><th>Category</th><td class="code">h</td><td class="term">Horse</td><td class="explain">An adult male horse</td></tr>
+      <tr><th>Category</th><td class="code">c</td><td class="term">Colt</td><td class="explain">A young male entire horse, usually under five</td></tr>
+      <tr><th>Category</th><td class="code">f</td><td class="term">Filly</td><td class="explain">A young filly horse, usually under four</td></tr>
+      <tr><th>Category</th><td class="code">s</td><td class="term">Stallion</td><td class="explain">An adult entire male</td></tr>
+    </table>
+  </div>
+
+  <!-- FORM & RESULTS -->
+  <h2>Form & Results</h2>
+  <div class="panel">
+    <table aria-label="Form and results legend">
+      <tr><th>Category</th><td class="code">P</td><td class="term">Pulled up</td><td class="explain">Horse did not finish the race</td></tr>
+      <tr><th>Category</th><td class="code">PU</td><td class="term">Pulled up</td><td class="explain">Horse did not finish the race</td></tr>
+      <tr><th>Category</th><td class="code">F</td><td class="term">Fell</td><td class="explain">Horse fell during the race</td></tr>
+      <tr><th>Category</th><td class="code">U</td><td class="term">Unseated rider</td><td class="explain">Rider fell off the horse</td></tr>
+      <tr><th>Category</th><td class="code">L</td><td class="term">Left at start</td><td class="explain">Horse left at the start</td></tr>
+      <tr><th>Category</th><td class="code">R</td><td class="term">Refused</td><td class="explain">Horse refused to jump or start the race</td></tr>
+      <tr><th>Category</th><td class="code">BD</td><td class="term">Brought down</td><td class="explain">Horse was knocked over by another</td></tr>
+      <tr><th>Category</th><td class="code">RO</td><td class="term">Ran out</td><td class="explain">Horse ran out at an obstacle</td></tr>
+      <tr><th>Category</th><td class="code">S</td><td class="term">Slipped up</td><td class="explain">Horse slipped up</td></tr>
+      <tr><th>Category</th><td class="code">V</td><td class="term">Void race</td><td class="explain">Race did not start</td></tr>
+      <tr><th>Category</th><td class="code">D</td><td class="term">Disqualified</td><td class="explain">Horse disqualified</td></tr>
+      <tr><th>Category</th><td class="code">C</td><td class="term">Carried out</td><td class="explain">Carried out</td></tr>
+      <tr><th>Category</th><td class="code">CD</td><td class="term">Won over course and distance</td><td class="explain">Horse has won over course and distance</td></tr>
+      <tr><th>Category</th><td class="code">HR</td><td class="term">Hit rails</td><td class="explain">Horse hit the rails</td></tr>
+
+      <tr><th>Category</th><td class="code">1</td><td class="term">Win</td><td class="explain">Finished first</td></tr>
+      <tr><th>Category</th><td class="code">2</td><td class="term">Second</td><td class="explain">Finished second</td></tr>
+      <tr><th>Category</th><td class="code">3</td><td class="term">Third</td><td class="explain">Finished third</td></tr>
+      <tr><th>Category</th><td class="code">4</td><td class="term">Fourth</td><td class="explain">Finished fourth</td></tr>
+      <tr><th>Category</th><td class="code">5</td><td class="term">Fifth</td><td class="explain">Finished fifth</td></tr>
+
+      <tr><th>Category</th><td class="code">-</td><td class="term">Separates years</td><td class="explain">Separates calendar years</td></tr>
+      <tr><th>Category</th><td class="code">0</td><td class="term">Finished outside placings</td><td class="explain">Finished but outside the placings</td></tr>
+      <tr><th>Category</th><td class="code">/</td><td class="term">Separates racing seasons</td><td class="explain">Separates racing season</td></tr>
+
+      <tr><th>Category</th><td class="code">Ex-NH</td><td class="term">Previous run in National Hunt race</td><td class="explain">Previous run in National Hunt race</td></tr>
+    </table>
+  </div>
+
+  <!-- DISTANCE & GROUND (your short codes) -->
+  <h2>Distances & Ground</h2>
+  <div class="panel">
+    <table aria-label="Distances and ground legend">
+      <tr><th>Category</th><td class="code">l</td><td class="term">Length</td><td class="explain">Length or lengths</td></tr>
+      <tr><th>Category</th><td class="code">m</td><td class="term">Mile</td><td class="explain">Mile</td></tr>
+      <tr><th>Category</th><td class="code">f</td><td class="term">Furlong</td><td class="explain">Furlong</td></tr>
+      <tr><th>Category</th><td class="code">y</td><td class="term">Yard</td><td class="explain">Yard</td></tr>
+      <tr><th>Category</th><td class="code">ev</td><td class="term">Even ground</td><td class="explain">Even ground</td></tr>
+    </table>
+    <p class="note">Note: “going” (soft, good, firm, etc.) is usually confirmed on the day.</p>
+  </div>
+
+  <!-- FORM SHORTHAND (your word codes) -->
+  <h2>Form shorthand</h2>
+  <div class="panel">
+    <table aria-label="Form shorthand legend">
+      <tr><th>Category</th><td class="code">ch</td><td class="term">Chased</td><td class="explain">Chased</td></tr>
+      <tr><th>Category</th><td class="code">til</td><td class="term">Until</td><td class="explain">Until</td></tr>
+      <tr><th>Category</th><td class="code">drvn</td><td class="term">Driven</td><td class="explain">Driven</td></tr>
+      <tr><th>Category</th><td class="code">pce</td><td class="term">Paced</td><td class="explain">Paced</td></tr>
+      <tr><th>Category</th><td class="code">out</td><td class="term">Out</td><td class="explain">Horse was beaten before the finish, from the home turn</td></tr>
+      <tr><th>Category</th><td class="code">wknd</td><td class="term">Weakened</td><td class="explain">Weakened</td></tr>
+      <tr><th>Category</th><td class="code">rdn</td><td class="term">Ridden</td><td class="explain">Ridden</td></tr>
+      <tr><th>Category</th><td class="code">wnr</td><td class="term">Winner</td><td class="explain">Winner</td></tr>
+    </table>
+  </div>
+
+  <!-- JOCKEY COLOURS -->
+  <h2>Jockey colours</h2>
+  <div class="panel">
+    <table aria-label="Jockey colours legend">
+      <tr><th>Category</th><td class="code">cap</td><td class="term">Cap</td><td class="explain">Colour of the jockey’s cap</td></tr>
+      <tr><th>Category</th><td class="code">body</td><td class="term">Body</td><td class="explain">Main colour of the jockey’s jacket</td></tr>
+      <tr><th>Category</th><td class="code">sleeves</td><td class="term">Sleeves</td><td class="explain">Colour or pattern on sleeves</td></tr>
+      <tr><th>Category</th><td class="code">chequers</td><td class="term">Chequered</td><td class="explain">Checked pattern</td></tr>
+      <tr><th>Category</th><td class="code">sash</td><td class="term">Sash</td><td class="explain">Diagonal stripe across the body</td></tr>
+      <tr><th>Category</th><td class="code">hoops</td><td class="term">Hoops</td><td class="explain">Horizontal stripes</td></tr>
+    </table>
+  </div>
+
+  <!-- COUNTRY -->
+  <h2>Country codes</h2>
+  <div class="panel">
+    <table aria-label="Country codes legend">
+      <tr><th>Category</th><td class="code">GB</td><td class="term">Great Britain</td><td class="explain">Great Britain</td></tr>
+      <tr><th>Category</th><td class="code">IRE</td><td class="term">Ireland</td><td class="explain">Ireland</td></tr>
+      <tr><th>Category</th><td class="code">FR</td><td class="term">France</td><td class="explain">France</td></tr>
+      <tr><th>Category</th><td class="code">GER</td><td class="term">Germany</td><td class="explain">Germany</td></tr>
+      <tr><th>Category</th><td class="code">USA</td><td class="term">USA</td><td class="explain">American</td></tr>
+    </table>
+  </div>
+
+  <!-- RECORD & BLOODLINE -->
+  <h2>Records & bloodlines</h2>
+  <div class="panel">
+    <table aria-label="Records and bloodlines legend">
+      <tr><th>Category</th><td class="code">w</td><td class="term">Wins</td><td class="explain">Number of races the horse has won</td></tr>
+      <tr><th>Category</th><td class="code">r</td><td class="term">Runs</td><td class="explain">Number of races the horse has run</td></tr>
+      <tr><th>Category</th><td class="code">Sire</td><td class="term">Sire</td><td class="explain">Horse’s father</td></tr>
+      <tr><th>Category</th><td class="code">Dam</td><td class="term">Dam</td><td class="explain">Horse’s mother</td></tr>
+      <tr><th>Category</th><td class="code">Damsire</td><td class="term">Damsire</td><td class="explain">Horse’s mother’s father</td></tr>
+    </table>
+  </div>
+
+  <!-- Internal build notes (kept discreet) -->
+  <details>
+    <summary><span class="tag">Internal</span>Build notes (Ella)</summary>
+    <div class="panel">
+      <ul>
+        <li><strong>Meeting / “Who is running this meeting”</strong>: Too generic. Prefer “Host Hunt” if that’s what you mean, or redirect to entered runners by race.</li>
+        <li><strong>“Who is running in this race?”</strong>: If declarations not confirmed, answer with “The horses entered are …” (no question back).</li>
+        <li><strong>Entries vs running</strong>: Use “runners/entries” for the printed card; “running/declared” only when day-of info is available.</li>
+        <li><strong>Qualification hunt wording</strong>: If you prefer not to mention “Hunt for Bloodhounds”, store only the hunt name and omit the word “Hunt” in Excel if needed.</li>
+        <li><strong>Placeholders</strong>: X values (e.g., weight, distance) are fine during build; keep spoken formats consistent.</li>
+        <li><strong>“What”</strong>: The companion stays inside the same act of knowing, unless clearly invited out of it.</li>
+      </ul>
+    </div>
+  </details>
+
+  <a class="back" href="./">← Back</a>
+
+</body>
+</html>
