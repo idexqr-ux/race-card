@@ -252,7 +252,7 @@
     </div>
   </div>
 
-  <script>
+ <script>
   // --- Calm speech helpers ---
   const ttsAvailable = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
 
@@ -260,58 +260,56 @@
     document.getElementById("answer").textContent = text;
   }
 
- function pickVoice(){
-  const voices = window.speechSynthesis.getVoices() || [];
-  return (
-    voices.find(v => /en-GB/i.test(v.lang)) ||
-    voices.find(v => /en/i.test(v.lang)) ||
-    voices[0] ||
-    null
-  );
-}
-
-function calmSpeak(text){
-  const status = document.getElementById("status");
-  status.textContent = ttsAvailable ? "Speaking" : "Speech not available (text only)";
-  setAnswer(text);
-
-  if(!ttsAvailable) return;
-
-  // soften characters that TTS reads oddly
-  const spoken = text.replace(/\s*\/\s*/g, " or ");
-
-  const speakNow = () => {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(spoken);
-
-    const v = pickVoice();
-    if(v) u.voice = v;
-
-    u.rate = 0.95;
-    u.pitch = 0.95;
-    u.volume = 1;
-
-    u.onend = () => { status.textContent = "Ready"; };
-    u.onerror = () => { status.textContent = "Speech error (text shown)"; };
-
-    window.speechSynthesis.speak(u);
-  };
-
-  // iOS Safari often needs voices to load first
-  const v = pickVoice();
-  if(v){
-    speakNow();
-  }else{
-    status.textContent = "Preparing voice";
-    const once = () => {
-      window.speechSynthesis.removeEventListener("voiceschanged", once);
-      speakNow();
-    };
-    window.speechSynthesis.addEventListener("voiceschanged", once);
-    // kick the voice engine
-    window.speechSynthesis.getVoices();
+  function pickVoice(){
+    const voices = window.speechSynthesis.getVoices() || [];
+    return (
+      voices.find(v => /en-GB/i.test(v.lang)) ||
+      voices.find(v => /en/i.test(v.lang)) ||
+      voices[0] ||
+      null
+    );
   }
-}
+
+  function calmSpeak(text){
+    const status = document.getElementById("status");
+    status.textContent = ttsAvailable ? "Speaking" : "Speech not available (text only)";
+    setAnswer(text);
+
+    if(!ttsAvailable) return;
+
+    const spoken = text.replace(/\s*\/\s*/g, " or ");
+
+    const speakNow = () => {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(spoken);
+
+      const v = pickVoice();
+      if(v) u.voice = v;
+
+      u.rate = 0.95;
+      u.pitch = 0.95;
+      u.volume = 1;
+
+      u.onend = () => { status.textContent = "Ready"; };
+      u.onerror = () => { status.textContent = "Speech error (text shown)"; };
+
+      window.speechSynthesis.speak(u);
+    };
+
+    // iOS Safari often needs voices to load first
+    const v = pickVoice();
+    if(v){
+      speakNow();
+    }else{
+      status.textContent = "Preparing voice";
+      const once = () => {
+        window.speechSynthesis.removeEventListener("voiceschanged", once);
+        speakNow();
+      };
+      window.speechSynthesis.addEventListener("voiceschanged", once);
+      window.speechSynthesis.getVoices(); // kick the voice engine
+    }
+  }
 
   // --- CSV data ---
   let LEGENDS = [];
@@ -388,11 +386,11 @@ function calmSpeak(text){
     if(!t) return null;
     return LEGENDS.find(x => lower(x.term) === t) || null;
   }
-    function spokenName(name){
-  if(!name) return "";
-  // remove trailing numbers like " 2", " 3"
-  return name.replace(/\s+\d+$/, "");
-}
+
+  function spokenName(name){
+    if(!name) return "";
+    return name.replace(/\s+\d+$/, ""); // remove trailing " 2"
+  }
 
   function findHorseFromQuestion(q){
     const m = q.match(/(?:horse\s*)?#?(\d{1,2})\b/);
@@ -404,7 +402,6 @@ function calmSpeak(text){
     return null;
   }
 
-  // --- Spoken-friendly age/sex ---
   function sexToWord(sexRaw){
     const s = lower(sexRaw);
     if(s === "m") return "mare";
@@ -424,7 +421,6 @@ function calmSpeak(text){
     return "";
   }
 
-  // --- CSV-powered "brain" ---
   function generateCalmAnswer(question){
     const raw = clean(question);
     const q = lower(raw);
@@ -435,16 +431,16 @@ function calmSpeak(text){
 
     if(!q) return orientation + " What would you like to know — colours, going, or a short summary?";
 
+    // what does TERM mean?
     const meanMatch = q.match(/what does (.+) mean\??/);
     if(meanMatch){
-  const term = clean(meanMatch[1]).replace(/[.?!]$/,"");
-  const hit = findLegend(term);
-  if(hit) return `${hit.meaning}.`;
-  return "I don’t have that term saved yet. If you add it to legends.csv, I’ll learn it.";
-}
-
+      const term = clean(meanMatch[1]).replace(/[.?!]$/,"");
+      const hit = findLegend(term);
+      if(hit) return `${hit.meaning}.`; // speak meaning only
+      return "I don’t have that term saved yet. If you add it to legends.csv, I’ll learn it.";
     }
 
+    // colours
     if(q.includes("colour") || q.includes("color") || q.includes("cap") || q.includes("sleeve") || q.includes("silk")){
       const horse = findHorseFromQuestion(q);
       if(horse){
@@ -456,16 +452,18 @@ function calmSpeak(text){
       return "If you tell me the horse number or name, I can read the colours as cap, body, sleeves.";
     }
 
+    // going
     if(q.includes("going")){
       const horse = findHorseFromQuestion(q);
       if(horse && clean(horse.going)){
         const g = clean(horse.going);
         const hit = findLegend(g);
-        return hit ? `Going is ${hit.meaning} (${g}).` : `Going is ${g}.`;
+        return hit ? `${hit.meaning}.` : `${g}.`;
       }
       return "If you tell me the horse number, I can read the going saved on this card.";
     }
 
+    // summary
     if(q.includes("summary") || q.includes("notes") || q.includes("tell me about")){
       const horse = findHorseFromQuestion(q);
       if(horse){
@@ -475,10 +473,11 @@ function calmSpeak(text){
         const as = ageSexPhrase(horse.age, horse.sex);
         if(as) bits.push(`${as}.`);
 
-       if(clean(horse.trainer)) bits.push(`Trained by ${spokenName(horse.trainer)}.`);
-if(clean(horse.jockey)) bits.push(`Ridden by ${spokenName(horse.jockey)}.`);
-if(clean(horse.notes)) bits.push(`Form notes: ${horse.notes}`);
+        if(clean(horse.trainer)) bits.push(`Trained by ${spokenName(horse.trainer)}.`);
+        if(clean(horse.jockey)) bits.push(`Ridden by ${spokenName(horse.jockey)}.`);
+        if(clean(horse.notes)) bits.push(`Form notes: ${horse.notes}`);
 
+        return bits.join(" ");
       }
       return "Tell me the horse number or name and I’ll give a short, calm summary.";
     }
