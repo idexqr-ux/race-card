@@ -404,10 +404,12 @@
 
     const meanMatch = q.match(/what does (.+) mean\??/);
     if(meanMatch){
-      const term = clean(meanMatch[1]).replace(/[.?!]$/,"");
-      const hit = findLegend(term);
-      if(hit) return `${hit.term}. ${hit.meaning}.`;
-      return "I don’t have that term saved yet. If you add it to legends.csv, I’ll learn it.";
+  const term = clean(meanMatch[1]).replace(/[.?!]$/,"");
+  const hit = findLegend(term);
+  if(hit) return `${hit.meaning}.`;
+  return "I don’t have that term saved yet. If you add it to legends.csv, I’ll learn it.";
+}
+
     }
 
     if(q.includes("colour") || q.includes("color") || q.includes("cap") || q.includes("sleeve") || q.includes("silk")){
