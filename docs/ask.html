@@ -384,9 +384,10 @@
       if(q.includes("colour") || q.includes("color") || q.includes("cap") || q.includes("sleeve") || q.includes("silk")){
         const horse = findHorseFromQuestion(q);
         if(horse){
-          const cap = clean(horse.cap) || "not set";
-          const body = clean(horse.body) || "not set";
-          const sleeves = clean(horse.sleeves) || "not set";
+         const cap = clean(horse.cap_colour) || "not set";
+         const body = clean(horse.body_colour) || "not set";
+         const sleeves = clean(horse.sleeves_colour) || "not set";
+
           return `Colours are read as cap, body, sleeves. For ${horse.horse_name}: cap ${cap}, body ${body}, sleeves ${sleeves}.`;
         }
         return "If you tell me the horse number or name, I can read the colours as cap, body, sleeves.";
