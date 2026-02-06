@@ -526,5 +526,64 @@
   document.getElementById("mode").textContent = ttsAvailable ? "Audio-first (TTS available)" : "Text-first (no TTS)";
 </script>
 
+  <script>
+  // 1) Where legends live (adjust if your path differs)
+  const legendLinks = {
+    "OR": "/docs/legends/#form",
+    "M": "/docs/legends/#sex",
+    "F": "/docs/legends/#sex",
+    "G": "/docs/legends/#sex",
+    "C": "/docs/legends/#sex",
+    "GS": "/docs/legends/#distances"
+  };
+
+  function findLegendLink(text) {
+    if (!text) return null;
+    const words = text.toUpperCase().split(/\s+/);
+    for (const w of words) {
+      if (legendLinks[w]) return { code: w, url: legendLinks[w] };
+    }
+    return null;
+  }
+
+  function renderLegendHint(userQuestion) {
+    const match = findLegendLink(userQuestion);
+    if (!match) return "";
+    return `
+      <p class="legend-hint">
+        <a href="${match.url}">What does ${match.code} mean?</a>
+      </p>
+    `;
+  }
+
+  // ---- Hook into your existing Ask action ----
+  // If you already have an Ask button, wire it here.
+  // Update these IDs to match your page.
+  const input = document.getElementById("q");       // your question box id
+  const askBtn = document.getElementById("askBtn"); // your Ask button id
+  const answer = document.getElementById("answer");
+
+  // If your IDs are different, change them above (q / askBtn).
+  // This demo just shows the link behaviour.
+  if (askBtn && input && answer) {
+    askBtn.addEventListener("click", () => {
+      const userQ = input.value || "";
+
+      // Your normal answer logic would run here.
+      // For now we’ll just show the legends hint if relevant.
+      answer.innerHTML = `
+        <p><strong>You asked:</strong> ${escapeHTML(userQ)}</p>
+        ${renderLegendHint(userQ)}
+      `;
+    });
+  }
+
+  function escapeHTML(s){
+    return String(s ?? "").replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[m]));
+  }
+</script>
+
 </body>
 </html>
