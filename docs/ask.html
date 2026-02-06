@@ -253,242 +253,239 @@
   </div>
 
   <script>
-    // --- Calm speech helpers ---
-    const ttsAvailable = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+  // --- Calm speech helpers ---
+  const ttsAvailable = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
 
-    function setAnswer(text){
-      document.getElementById("answer").textContent = text;
+  function setAnswer(text){
+    document.getElementById("answer").textContent = text;
+  }
+
+  function calmSpeak(text){
+    const status = document.getElementById("status");
+    status.textContent = ttsAvailable ? "Speaking" : "Speech not available (text only)";
+    setAnswer(text);
+
+    if(!ttsAvailable) return;
+
+    // soften characters that TTS reads oddly
+    text = text.replace(/\s*\/\s*/g, " or ");
+
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.95;
+    u.pitch = 0.95;
+    u.volume = 1;
+    u.onend = () => { status.textContent = "Ready"; };
+    u.onerror = () => { status.textContent = "Speech error (text shown)"; };
+    window.speechSynthesis.speak(u);
+  }
+
+  // --- CSV data ---
+  let LEGENDS = [];
+  let GATECARD = [];
+  let INDEX_BY_NO = new Map();
+  let INDEX_BY_NAME = new Map();
+
+  function clean(s){ return (s || "").toString().trim(); }
+  function lower(s){ return clean(s).toLowerCase(); }
+
+  function parseCSV(text){
+    const rows = [];
+    let row = [];
+    let cur = "";
+    let inQuotes = false;
+
+    for(let i=0; i<text.length; i++){
+      const ch = text[i], next = text[i+1];
+      if(ch === '"' && inQuotes && next === '"'){ cur += '"'; i++; continue; }
+      if(ch === '"'){ inQuotes = !inQuotes; continue; }
+      if(ch === "," && !inQuotes){ row.push(cur); cur = ""; continue; }
+
+      if((ch === "\n" || ch === "\r") && !inQuotes){
+        if(ch === "\r" && next === "\n") i++;
+        row.push(cur);
+        if(row.some(c => clean(c) !== "")) rows.push(row);
+        row = []; cur = ""; continue;
+      }
+      cur += ch;
     }
+    row.push(cur);
+    if(row.some(c => clean(c) !== "")) rows.push(row);
+    if(rows.length === 0) return [];
 
-    function calmSpeak(text){
-      const status = document.getElementById("status");
-      status.textContent = ttsAvailable ? "Speaking" : "Speech not available (text only)";
-      setAnswer(text);
-
-      if(!ttsAvailable) return;
-      window.speechSynthesis.cancel();
-
-      text = text.replace(/\s*\/\s*/g, " or ");
-
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = 0.95;
-      u.pitch = 0.95;
-      u.volume = 1;
-      u.onend = () => { status.textContent = "Ready"; };
-      u.onerror = () => { status.textContent = "Speech error (text shown)"; };
-      window.speechSynthesis.cancel();
-
-// soften characters that TTS reads oddly
-text = text.replace(/\s*\/\s*/g, " or ");
-
-const u = new SpeechSynthesisUtterance(text);
-
+    const headers = rows[0].map(h => lower(h));
+    const out = [];
+    for(let r=1; r<rows.length; r++){
+      const obj = {};
+      for(let c=0; c<headers.length; c++) obj[headers[c]] = clean(rows[r][c] ?? "");
+      out.push(obj);
     }
+    return out;
+  }
 
-    // --- CSV data ---
-    let LEGENDS = [];
-    let GATECARD = [];
-    let INDEX_BY_NO = new Map();
-    let INDEX_BY_NAME = new Map();
-
-    function clean(s){ return (s || "").toString().trim(); }
-    function lower(s){ return clean(s).toLowerCase(); }
-
-    function parseCSV(text){
-      const rows = [];
-      let row = [];
-      let cur = "";
-      let inQuotes = false;
-
-      for(let i=0; i<text.length; i++){
-        const ch = text[i], next = text[i+1];
-        if(ch === '"' && inQuotes && next === '"'){ cur += '"'; i++; continue; }
-        if(ch === '"'){ inQuotes = !inQuotes; continue; }
-        if(ch === "," && !inQuotes){ row.push(cur); cur = ""; continue; }
-
-        if((ch === "\n" || ch === "\r") && !inQuotes){
-          if(ch === "\r" && next === "\n") i++;
-          row.push(cur);
-          if(row.some(c => clean(c) !== "")) rows.push(row);
-          row = []; cur = ""; continue;
-        }
-        cur += ch;
-      }
-      row.push(cur);
-      if(row.some(c => clean(c) !== "")) rows.push(row);
-      if(rows.length === 0) return [];
-
-      const headers = rows[0].map(h => lower(h));
-      const out = [];
-      for(let r=1; r<rows.length; r++){
-        const obj = {};
-        for(let c=0; c<headers.length; c++) obj[headers[c]] = clean(rows[r][c] ?? "");
-        out.push(obj);
-      }
-      return out;
-    }
-
-    async function loadData(){
-      const statusEl = document.getElementById("status");
-      try{
-        statusEl.textContent = "Loading data";
-        const [legTxt, gateTxt] = await Promise.all([
-          fetch("legends.csv", { cache: "no-store" }).then(r => r.ok ? r.text() : ""),
-          fetch("gatecard.csv", { cache: "no-store" }).then(r => r.ok ? r.text() : "")
-        ]);
-
-        LEGENDS = legTxt ? parseCSV(legTxt) : [];
-        GATECARD = gateTxt ? parseCSV(gateTxt) : [];
-
-        INDEX_BY_NO.clear();
-        INDEX_BY_NAME.clear();
-        GATECARD.forEach(row => {
-          const no = clean(row.horse_no);
-          const nm = lower(row.horse_name);
-          if(no) INDEX_BY_NO.set(no, row);
-          if(nm) INDEX_BY_NAME.set(nm, row);
-        });
-
-        statusEl.textContent = `Ready (Legends: ${LEGENDS.length}, Gatecard: ${GATECARD.length})`;
-      }catch(e){
-        statusEl.textContent = "Ready (data not loaded)";
-      }
-    }
-
-    function findLegend(term){
-      const t = lower(term);
-      if(!t) return null;
-      return LEGENDS.find(x => lower(x.term) === t) || null;
-    }
-
-    function findHorseFromQuestion(q){
-      const m = q.match(/(?:horse\s*)?#?(\d{1,2})\b/);
-      if(m && INDEX_BY_NO.has(m[1])) return INDEX_BY_NO.get(m[1]);
-
-      for(const [nm, row] of INDEX_BY_NAME.entries()){
-        if(q.includes(nm)) return row;
-      }
-      return null;
-    }
-
-    function generateCalmAnswer(question){
-      const raw = clean(question);
-      const q = lower(raw);
-function sexToWord(sexRaw){
-  const s = lower(sexRaw);
-  if(s === "m") return "mare";
-  if(s === "f") return "filly";
-  if(s === "g") return "gelding";
-  if(s === "c") return "colt";
-  if(s === "h") return "horse";
-  return clean(sexRaw) || "";
-}
-
-function ageSexPhrase(ageRaw, sexRaw){
-  const age = clean(ageRaw);
-  const sexWord = sexToWord(sexRaw);
-  if(age && sexWord) return `${age} year old ${sexWord}`;
-  if(age) return `${age} year old`;
-  if(sexWord) return sexWord;
-  return "";
-}
-
-      const orientation =
-        "You’re in the Ask companion. I can speak answers and show a quiet written echo. " +
-        "You can tap a whisper prompt, or type a short question.";
-
-      if(!q) return orientation + " What would you like to know — colours, going, or a short summary?";
-
-      const meanMatch = q.match(/what does (.+) mean\??/);
-      if(meanMatch){
-        const term = clean(meanMatch[1]).replace(/[.?!]$/,"");
-        const hit = findLegend(term);
-        if(hit) return `${hit.term}. ${hit.meaning}.`;
-        return "I don’t have that term saved yet. If you add it to legends.csv, I’ll learn it.";
-      }
-
-      if(q.includes("colour") || q.includes("color") || q.includes("cap") || q.includes("sleeve") || q.includes("silk")){
-        const horse = findHorseFromQuestion(q);
-        if(horse){
-         const cap = clean(horse.cap_colour) || "not set";
-const body = clean(horse.body_colour) || "not set";
-const sleeves = clean(horse.sleeves_colour) || "not set";
-
-
-          return `${horse.horse_name}. Colours: cap ${cap}, body ${body}, sleeves ${sleeves}.`;
-
-        }
-        return "If you tell me the horse number or name, I can read the colours as cap, body, sleeves.";
-      }
-
-      if(q.includes("going")){
-        const horse = findHorseFromQuestion(q);
-        if(horse && clean(horse.going)){
-          const g = clean(horse.going);
-          const hit = findLegend(g);
-          return hit ? `Going is ${hit.meaning} (${g}).` : `Going is ${g}.`;
-        }
-        return "If you tell me the horse number, I can read the going saved on this card.";
-      }
-
-      if(q.includes("summary") || q.includes("notes") || q.includes("tell me about")){
-        const horse = findHorseFromQuestion(q);
-        if(horse){
-          const bits = [];
-          bits.push(`${horse.horse_name}.`);
-         const as = ageSexPhrase(horse.age, horse.sex);
-if(as) bits.push(`${as}.`);
- ${clean(horse.sex)}.`.trim());
-          if(clean(horse.trainer)) bits.push(`Trainer: ${horse.trainer}.`);
-          if(clean(horse.jockey)) bits.push(`Jockey: ${horse.jockey}.`);
-          if(clean(horse.notes)) bits.push(`Notes: ${horse.notes}`);
-          return bits.join(" ");
-        }
-        return "Tell me the horse number or name and I’ll give a short, calm summary.";
-      }
-
-      return orientation + " For data answers, include a horse number (like ‘horse 2’) or ask what a term means.";
-    }
-
-    // --- Wiring ---
-    const askButton = document.getElementById("askButton");
-    const speakBtn = document.getElementById("speakBtn");
-    const micBtn = document.getElementById("micBtn");
-    const typedAsk = document.getElementById("typedAsk");
+  async function loadData(){
     const statusEl = document.getElementById("status");
+    try{
+      statusEl.textContent = "Loading data";
+      const [legTxt, gateTxt] = await Promise.all([
+        fetch("legends.csv", { cache: "no-store" }).then(r => r.ok ? r.text() : ""),
+        fetch("gatecard.csv", { cache: "no-store" }).then(r => r.ok ? r.text() : "")
+      ]);
 
-    askButton.addEventListener("click", () => {
-      statusEl.textContent = "Thinking";
-      calmSpeak(generateCalmAnswer(""));
-    });
+      LEGENDS = legTxt ? parseCSV(legTxt) : [];
+      GATECARD = gateTxt ? parseCSV(gateTxt) : [];
 
-    speakBtn.addEventListener("click", () => {
-      statusEl.textContent = "Thinking";
-      calmSpeak(generateCalmAnswer(typedAsk.value || ""));
-    });
-
-    typedAsk.addEventListener("keydown", (e) => {
-      if(e.key === "Enter"){
-        e.preventDefault();
-        speakBtn.click();
-      }
-    });
-
-    document.querySelectorAll(".chip").forEach(btn => {
-      btn.addEventListener("click", () => {
-        statusEl.textContent = "Thinking";
-        const q = btn.getAttribute("data-q") || "";
-        typedAsk.value = q;
-        calmSpeak(generateCalmAnswer(q));
+      INDEX_BY_NO.clear();
+      INDEX_BY_NAME.clear();
+      GATECARD.forEach(row => {
+        const no = clean(row.horse_no);
+        const nm = lower(row.horse_name);
+        if(no) INDEX_BY_NO.set(no, row);
+        if(nm) INDEX_BY_NAME.set(nm, row);
       });
-    });
 
-    micBtn.addEventListener("click", () => {
-      calmSpeak("Voice input will be added later. For now, you can tap a whisper prompt or type a short question, then choose Speak answer.");
-    });
+      statusEl.textContent = `Ready (Legends: ${LEGENDS.length}, Gatecard: ${GATECARD.length})`;
+    }catch(e){
+      statusEl.textContent = "Ready (data not loaded)";
+    }
+  }
 
-    loadData();
-    document.getElementById("mode").textContent = ttsAvailable ? "Audio-first (TTS available)" : "Text-first (no TTS)";
-  </script>
+  function findLegend(term){
+    const t = lower(term);
+    if(!t) return null;
+    return LEGENDS.find(x => lower(x.term) === t) || null;
+  }
+
+  function findHorseFromQuestion(q){
+    const m = q.match(/(?:horse\s*)?#?(\d{1,2})\b/);
+    if(m && INDEX_BY_NO.has(m[1])) return INDEX_BY_NO.get(m[1]);
+
+    for(const [nm, row] of INDEX_BY_NAME.entries()){
+      if(q.includes(nm)) return row;
+    }
+    return null;
+  }
+
+  // --- Spoken-friendly age/sex ---
+  function sexToWord(sexRaw){
+    const s = lower(sexRaw);
+    if(s === "m") return "mare";
+    if(s === "f") return "filly";
+    if(s === "g") return "gelding";
+    if(s === "c") return "colt";
+    if(s === "h") return "horse";
+    return clean(sexRaw) || "";
+  }
+
+  function ageSexPhrase(ageRaw, sexRaw){
+    const age = clean(ageRaw);
+    const sexWord = sexToWord(sexRaw);
+    if(age && sexWord) return `${age} year old ${sexWord}`;
+    if(age) return `${age} year old`;
+    if(sexWord) return sexWord;
+    return "";
+  }
+
+  // --- CSV-powered "brain" ---
+  function generateCalmAnswer(question){
+    const raw = clean(question);
+    const q = lower(raw);
+
+    const orientation =
+      "You’re in the Ask companion. I can speak answers and show a quiet written echo. " +
+      "You can tap a whisper prompt, or type a short question.";
+
+    if(!q) return orientation + " What would you like to know — colours, going, or a short summary?";
+
+    const meanMatch = q.match(/what does (.+) mean\??/);
+    if(meanMatch){
+      const term = clean(meanMatch[1]).replace(/[.?!]$/,"");
+      const hit = findLegend(term);
+      if(hit) return `${hit.term}. ${hit.meaning}.`;
+      return "I don’t have that term saved yet. If you add it to legends.csv, I’ll learn it.";
+    }
+
+    if(q.includes("colour") || q.includes("color") || q.includes("cap") || q.includes("sleeve") || q.includes("silk")){
+      const horse = findHorseFromQuestion(q);
+      if(horse){
+        const cap = clean(horse.cap_colour) || "not set";
+        const body = clean(horse.body_colour) || "not set";
+        const sleeves = clean(horse.sleeves_colour) || "not set";
+        return `${horse.horse_name}. Colours: cap ${cap}, body ${body}, sleeves ${sleeves}.`;
+      }
+      return "If you tell me the horse number or name, I can read the colours as cap, body, sleeves.";
+    }
+
+    if(q.includes("going")){
+      const horse = findHorseFromQuestion(q);
+      if(horse && clean(horse.going)){
+        const g = clean(horse.going);
+        const hit = findLegend(g);
+        return hit ? `Going is ${hit.meaning} (${g}).` : `Going is ${g}.`;
+      }
+      return "If you tell me the horse number, I can read the going saved on this card.";
+    }
+
+    if(q.includes("summary") || q.includes("notes") || q.includes("tell me about")){
+      const horse = findHorseFromQuestion(q);
+      if(horse){
+        const bits = [];
+        bits.push(`${horse.horse_name}.`);
+
+        const as = ageSexPhrase(horse.age, horse.sex);
+        if(as) bits.push(`${as}.`);
+
+        if(clean(horse.trainer)) bits.push(`Trainer: ${horse.trainer}.`);
+        if(clean(horse.jockey)) bits.push(`Jockey: ${horse.jockey}.`);
+        if(clean(horse.notes)) bits.push(`Notes: ${horse.notes}`);
+        return bits.join(" ");
+      }
+      return "Tell me the horse number or name and I’ll give a short, calm summary.";
+    }
+
+    return orientation + " For data answers, include a horse number (like ‘horse 2’) or ask what a term means.";
+  }
+
+  // --- Wiring ---
+  const askButton = document.getElementById("askButton");
+  const speakBtn = document.getElementById("speakBtn");
+  const micBtn = document.getElementById("micBtn");
+  const typedAsk = document.getElementById("typedAsk");
+  const statusEl = document.getElementById("status");
+
+  askButton.addEventListener("click", () => {
+    statusEl.textContent = "Thinking";
+    calmSpeak(generateCalmAnswer(""));
+  });
+
+  speakBtn.addEventListener("click", () => {
+    statusEl.textContent = "Thinking";
+    calmSpeak(generateCalmAnswer(typedAsk.value || ""));
+  });
+
+  typedAsk.addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      e.preventDefault();
+      speakBtn.click();
+    }
+  });
+
+  document.querySelectorAll(".chip").forEach(btn => {
+    btn.addEventListener("click", () => {
+      statusEl.textContent = "Thinking";
+      const q = btn.getAttribute("data-q") || "";
+      typedAsk.value = q;
+      calmSpeak(generateCalmAnswer(q));
+    });
+  });
+
+  micBtn.addEventListener("click", () => {
+    calmSpeak("Voice input will be added later. For now, you can tap a whisper prompt or type a short question, then choose Speak answer.");
+  });
+
+  loadData();
+  document.getElementById("mode").textContent = ttsAvailable ? "Audio-first (TTS available)" : "Text-first (no TTS)";
+</script>
+
 </body>
 </html>
