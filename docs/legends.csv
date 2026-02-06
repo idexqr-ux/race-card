@@ -1,4 +1,4 @@
-category,term,meaning
+code,section,title,definition,anchor
 key,type,label,speak,notes
 cap,type,Cap,Cap,Order for colours: cap, body, sleeves
 body,type,Body,Body,
@@ -18,3 +18,9 @@ nov,abbr,Nov,novice,
 ch,abbr,Ch,challenger,Showing: “CH” might mean Champion depending on your system
 colours,help,Colours line,Colours are described in this order: cap, body, sleeves.,Calm explanation
 course,help,Course orientation,If you tell me a landmark I can help you orient gently.,For maps later
+OR,form,Official Rating,The official handicap rating assigned to a horse.,form
+M,sex,Mare,Female horse aged five or older.,sex
+F,sex,Filly,Female horse aged four or younger.,sex
+G,sex,Gelding,Male horse that has been castrated.,sex
+C,sex,Colt,Young male horse.,sex
+GS,distances,Good to Soft,Ground condition between good and soft.,distances
