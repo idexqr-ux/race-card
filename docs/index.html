@@ -4,10 +4,17 @@
   <meta charset="UTF-8">
   <meta http-equiv="refresh" content="0; url=home.html">
   <title>IdexQR</title>
+  <link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#B8C6C1">
 </head>
 <body>
   <p>
     Redirecting to <a href="home.html">home</a>…
   </p>
+  <script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js");
+  }
+</script>
 </body>
 </html>
