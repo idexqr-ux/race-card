@@ -12,6 +12,8 @@ r<!doctype html>
     .sub{color:#5a5a5a}
     ul{padding-left:18px}
   </style>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#B8C6C1">
 </head>
 <body>
   <h1>Legends</h1>
@@ -24,6 +26,11 @@ r<!doctype html>
       <li><a href="./shared.html">Shared terms</a> <span class="sub">(optional)</span></li>
     </ul>
   </div>
+  <script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js");
+  }
+</script>
 </body>
 </html>
 
