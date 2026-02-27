@@ -17,9 +17,9 @@
   <script src="./app.js"></script>
   <script>
   (async () => {
-    const raceId = qs("race_id") || "R1"; // default for testing
+    const raceNo = qs("race_no") || "1";
     const data = await loadCSV("./gatecard.csv");
-    const rows = data.filter(r => r.race_id === raceId);
+    const rows = data.filter(r => String(r.race_no) === String(raceNo));
 
     document.getElementById("raceTitle").textContent =
       rows.length ? `${rows[0].race_time} — ${rows[0].race_title}` : "Race not found";
