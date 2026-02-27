@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Runner</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <a id="backLink" class="back" href="./racing.html">← Back</a>
+    <h1 id="name">Runner</h1>
+    <div id="meta" class="card"></div>
+    <div id="notes" class="card"></div>
+  </div>
+
+  <script src="./app.js"></script>
+  <script>
+  (async () => {
+    const raceId = qs("race_id");
+    const runnerId = qs("runner_id");
+    document.getElementById("backLink").href = `./racing.html?race_id=${encodeURIComponent(raceId)}`;
+
+    const data = await loadCSV("./gatecard.csv");
+    const r = data.find(x => x.race_id === raceId && x.runner_id === runnerId);
+
+    if (!r) {
+      document.getElementById("name").textContent = "Runner not found";
+      document.getElementById("meta").textContent = "—";
+      document.getElementById("notes").textContent = "—";
+      return;
+    }
+
+    document.getElementById("name").textContent = `${r.runner_no}. ${r.runner_name}`;
+    document.getElementById("meta").innerHTML = `
+      <div><strong>Age/Sex:</strong> ${r.age} ${r.sex}</div>
+      <div><strong>Trainer:</strong> ${r.trainer}</div>
+      <div><strong>Jockey:</strong> ${r.jockey}</div>
+      <div><strong>Form:</strong> ${r.form}</div>
+    `;
+    const safeNotes = (r.notes || "—").replaceAll("<","&lt;").replaceAll(">","&gt;");
+    document.getElementById("notes").innerHTML = `<div><strong>Notes:</strong></div><div>${safeNotes}</div>`;
+  })();
+  </script>
+</body>
+</html>
