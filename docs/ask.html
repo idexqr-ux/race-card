@@ -272,9 +272,11 @@
   }
 
   function calmSpeak(text){
-    const status = document.getElementById("status");
-    status.textContent = ttsAvailable ? "Speaking" : "Speech not available (text only)";
-    setAnswer(text);
+  if (!text) return;
+
+  const status = document.getElementById("status");
+  status.textContent = ttsAvailable ? "Speaking" : "Speech not available (text only)";
+  setAnswer(text);
 
     if(!ttsAvailable) return;
 
@@ -453,9 +455,9 @@ if (
   (q.includes("colour") || q.includes("color") || q.includes("silk"))
 ) {
   playAudio("horse1-silks.mp3");
-  return "Horse 1's colours.";
+  setAnswer("Horse 1's colours.");
+  return "";
 }
-
     if(q.includes("colour") || q.includes("color") || q.includes("cap") || q.includes("sleeve") || q.includes("silk")){
       const horse = findHorseFromQuestion(q);
       if(horse){
