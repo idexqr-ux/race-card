@@ -442,6 +442,15 @@
     }
 
     // colours
+if (
+  q.includes("horse 1") &&
+  (q.includes("colour") || q.includes("color") || q.includes("silk"))
+) {
+  playAudio("horse1-silks.mp3");
+  return "Horse 1's colours.";
+}
+
+if(q.includes("colour") || q.includes("color") || q.includes("cap") || q.includes("sleeve") || q.includes("silk")){
     if(q.includes("colour") || q.includes("color") || q.includes("cap") || q.includes("sleeve") || q.includes("silk")){
       const horse = findHorseFromQuestion(q);
       if(horse){
