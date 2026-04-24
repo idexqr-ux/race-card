@@ -422,6 +422,12 @@
     return "";
   }
 
+   function playAudio(src){
+  const audio = new Audio(src);
+  audio.play().catch(() => {
+    document.getElementById("status").textContent = "Audio file found, but playback was blocked.";
+  });
+}
   function generateCalmAnswer(question){
     const raw = clean(question);
     const q = lower(raw);
@@ -446,8 +452,7 @@ if (
   q.includes("horse 1") &&
   (q.includes("colour") || q.includes("color") || q.includes("silk"))
 ) {
-  playAudio("horse1-silks.mp3");
-  return "Horse 1's colours.";
+  return "Horse 1 colours test. The audio file is ready.";
 }
 
 if(q.includes("colour") || q.includes("color") || q.includes("cap") || q.includes("sleeve") || q.includes("silk")){
