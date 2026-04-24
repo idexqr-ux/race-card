@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spring Home and Living Show — Know Before You Go</title>
+  <meta name="description" content="A calm event guide for directions, parking, arrival, and leaving." />
+  <link rel="stylesheet" href="style.css?v=7" />
+</head>
+
+<body>
+  <a id="top"></a>
+
+  <header class="wrap" aria-hidden="true">
+    <p class="kicker">Know before you go</p>
+    <h1>Spring Home and Living Show</h1>
+    <p class="sub">You’re ready to go.</p>
+  </header>
+
+  <main class="wrap">
+    <section aria-labelledby="page-title">
+      <h1 id="page-title" class="sr-only">Spring Home and Living Show guide</h1>
+      <p class="sr-only">
+        You have scanned the Spring Home and Living Show code. This guide can help with arrival,
+        directions, parking, and leaving the event.
+      </p>
+    </section>
+
+    <p class="sub">National Exhibition Centre, Birmingham</p>
+
+    <p class="muted-line">
+      Saturday 12<sup>th</sup> April — doors open at 10am
+    </p>
+
+    <p class="muted-line">
+      Hall 3, Block B, Row 12 — just to the right as you enter
+    </p>
+
+    <div class="listen-group">
+    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Spring+Home+and+Living+Show&dates=20260412T090000Z/20260412T160000Z&location=National+Exhibition+Centre+Birmingham&details=Spring+Home+and+Living+Show"
+   class="quiet-button"
+   target="_blank"
+   rel="noopener">
+  Add to calendar
+</a>
+    </div>
+
+    <p class="muted-line">Travel and arrival</p>
+
+    <div class="listen-group">
+      <button class="quiet-button" type="button" onclick="playEmbeddedAudio('trainAudio')">
+  Train — note
+</button>
+      <a href="https://www.google.com/maps/search/?api=1&query=National+Exhibition+Centre+Birmingham"
+   class="quiet-button"
+   target="_blank"
+   rel="noopener">
+  Open in maps
+</a>
+    </div>
+    <div class="listen-group">
+  <button class="quiet-button" type="button" onclick="playEmbeddedAudio('eventAudio')">
+    Event — note
+  </button>
+</div>
+
+    <div class="listen-group">
+      <button class="quiet-button" type="button" onclick="playEmbeddedAudio('parkingAudio')">
+        Parking — note
+      </button>
+      <a href="YOUR-TICKET-LINK" class="quiet-button">
+        View ticket QR
+      </a>
+    </div>
+    
+    <div class="save-ticket">
+  <p class="save-line">
+    For quick access on the day, you can save this page to your home screen.
+  </p>
+
+  <button class="save-link" type="button" onclick="toggleSaveHelp()" aria-expanded="false" aria-controls="saveHelp">
+    How to save
+  </button>
+
+  <div id="saveHelp" class="save-help" hidden>
+
+  <p>
+    <strong>On iPhone or iPad:</strong>
+    look for the share icon ⬆️ (a square with an arrow) and choose <em>Add to Home Screen</em>.
+  </p>
+
+  <p>
+    <strong>On Android:</strong>
+    open the browser menu, then choose <em>Add to Home Screen</em>.
+  </p>
+
+</div>
+
+ <p class="powered-by">
+  Powered by IdexQR
+</p>
+
+<footer class="footer" style="text-align: center;">
+  <a href="index.html" class="back-link">Back to IdexQR</a>
+</footer>
+
+<audio id="parkingAudio" src="audio/parking.mp3" preload="auto"></audio>
+<audio id="trainAudio" src="audio/train.mp3" preload="auto"></audio>
+<audio id="eventAudio" src="audio/event.mp3" preload="auto"></audio>
+
+<script>
+  let currentAudio = null;
+
+  function stopCurrentAudio() {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+  }
+
+  function playEmbeddedAudio(id) {
+    stopCurrentAudio();
+    currentAudio = document.getElementById(id);
+
+    if (!currentAudio) return;
+
+    currentAudio.currentTime = 0;
+
+    const playPromise = currentAudio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(err => {
+        console.error("Embedded audio failed:", id, err);
+      });
+    }
+  }
+</script>
+
+    <script>
+  function toggleSaveHelp() {
+    const help = document.getElementById('saveHelp');
+    const btn = document.querySelector('.save-link');
+    const isHidden = help.hidden;
+
+    help.hidden = !isHidden;
+    btn.setAttribute('aria-expanded', String(isHidden));
+  }
+</script>
+</body>
+</html>
