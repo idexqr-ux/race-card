@@ -686,24 +686,65 @@ if (
   q.includes("form")
 ) {
   playAudio(`horse${askedHorseNo}-form.mp3`);
-  setAnswer(`Horse ${askedHorseNo} — form.`);
+
+  const horse = GATECARD.find(
+    h => String(h.horse_no).trim() === String(askedHorseNo).trim()
+  );
+
+  setAnswer(
+    horse
+      ? `${horse.horse_name} — form: ${horse.form_code}`
+      : `Horse ${askedHorseNo} — form.`
+  );
+
   return "";
 }
+
 if (q.includes("horse 1") && q.includes("form")) {
   playAudio("horse1-form.mp3");
-  setAnswer("Horse 1 — form.");
+
+  const horse = GATECARD.find(
+    h => String(h.horse_no).trim() === "1"
+  );
+
+  setAnswer(
+    horse
+      ? `${horse.horse_name} — form: ${horse.form_code}`
+      : "Horse 1 — form."
+  );
+
   return "";
 }
 
 if (q.includes("horse 2") && q.includes("form")) {
   playAudio("horse2-form.mp3");
-  setAnswer("Horse 2 — form.");
+
+  const horse = GATECARD.find(
+    h => String(h.horse_no).trim() === "2"
+  );
+
+  setAnswer(
+    horse
+      ? `${horse.horse_name} — form: ${horse.form_code}`
+      : "Horse 2 — form."
+  );
+
   return "";
 }
 
 if (q.includes("horse 3") && q.includes("form")) {
   playAudio("horse3-form.mp3");
-  setAnswer("Horse 3 — form.");
+
+  const horse = GATECARD.find(
+    h => String(h.horse_no).trim() === "3"
+  );
+
+  setAnswer(
+    horse
+      ? `${horse.horse_name} — form: ${horse.form_code}`
+      : "Horse 3 — form."
+  );
+
   return "";
 }
 
