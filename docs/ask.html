@@ -748,19 +748,31 @@ if (q.includes("horse 3") && q.includes("form")) {
   return "";
 }
 
-   // breeding / pedigree
+  // breeding / pedigree
 if (
   q.includes("sire") ||
   q.includes("dam") ||
   q.includes("breeding") ||
   q.includes("bred from")
 ) {
-  const horse = askedHorseNo
-    ? GATECARD.find(h => String(h.horse_no).trim() === String(askedHorseNo).trim())
-    : findHorseFromQuestion(q);
+  let horse = null;
+
+  if (askedHorseNo) {
+    horse = GATECARD.find(
+      h => String(h.horse_no).trim() === String(askedHorseNo).trim()
+    );
+  }
+
+  if (!horse) {
+    horse = findHorseFromQuestion(q);
+  }
 
   if (!horse) {
     return "Tell me the horse number or name and I can explain the breeding.";
+  }
+
+  if (q.includes("damsire")) {
+    return `${horse.horse_name}'s damsire is ${horse.damsire} (${horse.damsire_country}).`;
   }
 
   if (q.includes("sire") && !q.includes("damsire")) {
@@ -768,11 +780,7 @@ if (
   }
 
   if (q.includes("dam") && !q.includes("damsire")) {
-    return `${horse.horse_name}'s dam is ${horse.dam} of (${horse.dam_country}).`;
-  }
-
-  if (q.includes("damsire")) {
-    return `${horse.horse_name}'s damsire is ${horse.damsire} of (${horse.damsire_country}).`;
+    return `${horse.horse_name}'s dam is ${horse.dam} (${horse.dam_country}).`;
   }
 
   return `${horse.horse_name} is by ${horse.sire} (${horse.sire_country}), out of ${horse.dam} (${horse.dam_country}), whose sire was ${horse.damsire} (${horse.damsire_country}).`;
