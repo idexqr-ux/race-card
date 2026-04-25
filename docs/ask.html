@@ -503,9 +503,15 @@ if (
     }
 
     if (raceHeader.distance_miles || raceHeader.distance_furlongs) {
-      parts.push(
-        `run over ${raceHeader.distance_miles || 0} miles and ${raceHeader.distance_furlongs || 0} furlongs`
-      );
+      const miles = Number(raceHeader.distance_miles || 0);
+const furlongs = Number(raceHeader.distance_furlongs || 0);
+
+const mileLabel = miles === 1 ? "mile" : "miles";
+const furlongLabel = furlongs === 1 ? "furlong" : "furlongs";
+
+parts.push(
+  `run over ${miles} ${mileLabel} and ${furlongs} ${furlongLabel}`
+);
     }
 
     return parts.join(" ") + ".";
