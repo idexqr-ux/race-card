@@ -454,6 +454,31 @@
       return "I don’t have that term saved yet. If you add it to legends.csv, I’ll learn it.";
     }
 
+    // race-level context
+if (q.includes("race 1") && (q.includes("time") || q.includes("when"))) {
+  return "Race 1 is the Golden Stirrup at 1:45pm.";
+}
+
+if (q.includes("race 2") && (q.includes("time") || q.includes("when"))) {
+  return "Race 2 is the Crystal Bowl at 2:30pm.";
+}
+
+if (q.includes("race 1") && (q.includes("called") || q.includes("name"))) {
+  return "Race 1 is called the Golden Stirrup.";
+}
+
+if (q.includes("race 2") && (q.includes("called") || q.includes("name"))) {
+  return "Race 2 is called the Crystal Bowl.";
+}
+
+if (q.includes("how many runners") && q.includes("race 1")) {
+  return "Race 1 has three runners: Houla Cove, Streamline, and On My Way.";
+}
+
+if (q.includes("how many runners") && q.includes("race 2")) {
+  return "Race 2 has three runners: Storm Chaser, Professor Peach, and Move Along.";
+}
+
     // colours
 if (
   q.includes("horse 2") &&
