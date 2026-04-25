@@ -12,7 +12,12 @@
 
     <p class="kicker">You are looking at</p>
     <h1 id="horseName">Runner</h1>
-
+<p>
+  <a id="askHorseLink" class="quiet-button" href="./ask.html">
+    Ask about this horse
+  </a>
+</p>
+    
     <p>
       <button class="quiet-button" type="button" onclick="playAudio('audio/help.mp3')">
         Listen — I’ll guide you through this
@@ -100,6 +105,12 @@
       const raceNo = qs("race_no");
       const horseNo = qs("horse_no");
       const horseName = qs("horse_name");
+      const askHorseLink = document.getElementById("askHorseLink");
+
+if (askHorseLink) {
+  askHorseLink.href =
+    `./ask.html?context=horse&race_no=${encodeURIComponent(raceNo || "")}&horse_no=${encodeURIComponent(horseNo || "")}`;
+}
 
       document.getElementById("backLink").href = `./racing.html?race_no=${encodeURIComponent(raceNo || "1")}`;
 
