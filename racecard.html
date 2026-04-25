@@ -1,149 +1,203 @@
 <!doctype html>
-<html lang="en-GB">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Spring Home and Living Show — Know Before You Go</title>
-  <meta name="description" content="A calm event guide for directions, parking, arrival, and leaving." />
-  <link rel="stylesheet" href="style.css?v=7" />
+  <title>Race Card</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
-
 <body>
-  <a id="top"></a>
+  <div class="wrap">
+    <a class="back" href="./index.html">← Back to Ask Pilot</a>
 
-  <header class="wrap" aria-hidden="true">
-    <p class="kicker">Know before you go</p>
-    <h1>Spring Home and Living Show</h1>
-    <p class="sub">You’re ready to go.</p>
-  </header>
+    <h1 id="meetingTitle">Matchem Race Meeting</h1>
+    <p class="hint">Choose a race to view its runners, then tap a horse for more detail.</p>
 
-  <main class="wrap">
-    <section aria-labelledby="page-title">
-      <h1 id="page-title" class="sr-only">Spring Home and Living Show guide</h1>
-      <p class="sr-only">
-        You have scanned the Spring Home and Living Show code. This guide can help with arrival,
-        directions, parking, and leaving the event.
-      </p>
-    </section>
+    <div id="racecard"></div>
+  </div>
 
-    <p class="sub">National Exhibition Centre, Birmingham</p>
+  <script>
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
 
-    <p class="muted-line">
-      Saturday 12<sup>th</sup> April — doors open at 10am
-    </p>
+      text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
-    <p class="muted-line">
-      Hall 3, Block B, Row 12 — just to the right as you enter
-    </p>
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
 
-    <div class="listen-group">
-    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Spring+Home+and+Living+Show&dates=20260412T090000Z/20260412T160000Z&location=National+Exhibition+Centre+Birmingham&details=Spring+Home+and+Living+Show"
-   class="quiet-button"
-   target="_blank"
-   rel="noopener">
-  Add to calendar
-</a>
-    </div>
+        if (ch === '"') {
+          if (inQuotes && next === '"') {
+            cell += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+          continue;
+        }
 
-    <p class="muted-line">Travel and arrival</p>
+        if (ch === "," && !inQuotes) {
+          row.push(cell.trim());
+          cell = "";
+          continue;
+        }
 
-    <div class="listen-group">
-      <button class="quiet-button" type="button" onclick="playEmbeddedAudio('trainAudio')">
-  Train — note
-</button>
-      <a href="https://www.google.com/maps/search/?api=1&query=National+Exhibition+Centre+Birmingham"
-   class="quiet-button"
-   target="_blank"
-   rel="noopener">
-  Open in maps
-</a>
-    </div>
-    <div class="listen-group">
-  <button class="quiet-button" type="button" onclick="playEmbeddedAudio('eventAudio')">
-    Event — note
-  </button>
-</div>
+        if (ch === "\n" && !inQuotes) {
+          row.push(cell.trim());
+          cell = "";
+          if (row.some(v => v.length)) rows.push(row);
+          row = [];
+          continue;
+        }
 
-    <div class="listen-group">
-      <button class="quiet-button" type="button" onclick="playEmbeddedAudio('parkingAudio')">
-        Parking — note
-      </button>
-      <a href="YOUR-TICKET-LINK" class="quiet-button">
-        View ticket QR
-      </a>
-    </div>
-    
-    <div class="save-ticket">
-  <p class="save-line">
-    For quick access on the day, you can save this page to your home screen.
-  </p>
+        cell += ch;
+      }
 
-  <button class="save-link" type="button" onclick="toggleSaveHelp()" aria-expanded="false" aria-controls="saveHelp">
-    How to save
-  </button>
+      if (cell.length || row.length) {
+        row.push(cell.trim());
+        if (row.some(v => v.length)) rows.push(row);
+      }
 
-  <div id="saveHelp" class="save-help" hidden>
+      if (!rows.length) return [];
 
-  <p>
-    <strong>On iPhone or iPad:</strong>
-    look for the share icon ⬆️ (a square with an arrow) and choose <em>Add to Home Screen</em>.
-  </p>
-
-  <p>
-    <strong>On Android:</strong>
-    open the browser menu, then choose <em>Add to Home Screen</em>.
-  </p>
-
-</div>
-
- <p class="powered-by">
-  Powered by IdexQR
-</p>
-
-<footer class="footer" style="text-align: center;">
-  <a href="index.html" class="back-link">Back to IdexQR</a>
-</footer>
-
-<audio id="parkingAudio" src="audio/parking.mp3" preload="auto"></audio>
-<audio id="trainAudio" src="audio/train.mp3" preload="auto"></audio>
-<audio id="eventAudio" src="audio/event.mp3" preload="auto"></audio>
-
-<script>
-  let currentAudio = null;
-
-  function stopCurrentAudio() {
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
-    }
-  }
-
-  function playEmbeddedAudio(id) {
-    stopCurrentAudio();
-    currentAudio = document.getElementById(id);
-
-    if (!currentAudio) return;
-
-    currentAudio.currentTime = 0;
-
-    const playPromise = currentAudio.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(err => {
-        console.error("Embedded audio failed:", id, err);
+      const headers = rows[0].map(h => h.trim());
+      return rows.slice(1).map(cols => {
+        const obj = {};
+        headers.forEach((h, idx) => {
+          obj[h] = (cols[idx] ?? "").trim();
+        });
+        return obj;
       });
     }
-  }
-</script>
 
-    <script>
-  function toggleSaveHelp() {
-    const help = document.getElementById('saveHelp');
-    const btn = document.querySelector('.save-link');
-    const isHidden = help.hidden;
+    async function loadCSV(url) {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("CSV fetch failed: " + res.status);
+      return parseCSV(await res.text());
+    }
 
-    help.hidden = !isHidden;
-    btn.setAttribute('aria-expanded', String(isHidden));
-  }
-</script>
+    function format12h(raw) {
+      if (!raw) return "";
+
+      const s = String(raw).trim().toLowerCase();
+      const hasAm = s.includes("am");
+      const hasPm = s.includes("pm");
+      const m = s.match(/(\d{1,2})\s*[:.]\s*(\d{2})/);
+      if (!m) return "";
+
+      let h = Number(m[1]);
+      const mins = Number(m[2]);
+      if (!Number.isFinite(h) || !Number.isFinite(mins) || mins < 0 || mins > 59) return "";
+
+      if (h >= 13 && h <= 23) {
+        const hour12 = h % 12;
+        return `${hour12}:${String(mins).padStart(2, "0")}pm`;
+      }
+      if (h === 0) return `12:${String(mins).padStart(2, "0")}am`;
+      if (h === 12) return `12:${String(mins).padStart(2, "0")}${hasAm ? "am" : "pm"}`;
+
+      if (!hasAm && !hasPm) {
+        return `${h}:${String(mins).padStart(2, "0")}pm`;
+      }
+
+      const suffix = hasPm ? "pm" : "am";
+      return `${h}:${String(mins).padStart(2, "0")}${suffix}`;
+    }
+
+    (async function () {
+      const racecardEl = document.getElementById("racecard");
+      racecardEl.textContent = "Loading…";
+
+      const localUrl = "./gatecard.csv?x=" + Date.now();
+      const remoteUrl = "https://idexqr-ux.github.io/ask-pilot-/gatecard.csv?x=" + Date.now();
+
+      try {
+        let data;
+
+        try {
+          data = await loadCSV(localUrl);
+        } catch {
+          data = await loadCSV(remoteUrl);
+        }
+
+        const meetingName =
+          data.find(r => r.meeting_name && !r.horse_no)?.meeting_name ||
+          "Matchem Race Meeting";
+
+        document.getElementById("meetingTitle").textContent = meetingName;
+        racecardEl.innerHTML = "";
+
+        const raceNos = [...new Set(data.map(r => r.race_no).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
+
+        raceNos.forEach(raceNo => {
+          const raceRows = data.filter(r => String(r.race_no) === String(raceNo));
+          const raceHeader = raceRows.find(r => !r.horse_no);
+          const runners = raceRows.filter(r => r.horse_no);
+
+          const section = document.createElement("section");
+          section.className = "card";
+
+          const title = document.createElement("h2");
+          const time = format12h(raceHeader?.race_time || "");
+          title.textContent =
+            `Race ${raceNo}` +
+            (time ? ` (${time})` : "") +
+            (raceHeader?.race_name ? ` — ${raceHeader.race_name}` : "");
+
+          section.appendChild(title);
+
+          runners.forEach(r => {
+            const card = document.createElement("a");
+            card.className = "card";
+            card.href = `./runner.html?race_no=${encodeURIComponent(r.race_no)}&horse_no=${encodeURIComponent(r.horse_no)}`;
+
+            const rowTop = document.createElement("div");
+            rowTop.className = "row-top";
+
+            const horseTitle = document.createElement("div");
+            horseTitle.className = "runner-title";
+            horseTitle.textContent = `${r.horse_no}. ${r.horse_name}`;
+            rowTop.appendChild(horseTitle);
+
+            if (r.silks_img) {
+              const img = document.createElement("img");
+              img.className = "silks";
+              img.src = "./" + r.silks_img;
+              img.alt = "Racing colours";
+              rowTop.appendChild(img);
+            }
+
+            const trainer = document.createElement("div");
+            trainer.className = "sub";
+            trainer.innerHTML = `<strong>T:</strong> ${r.trainer_name || "—"}`;
+
+            const jockey = document.createElement("div");
+            jockey.className = "sub";
+            jockey.innerHTML = `<strong>J:</strong> ${r.jockey_name || "—"}`;
+
+            const weight = document.createElement("div");
+            weight.className = "muted-line";
+            const st = (r.weight_stone || "").trim();
+            const lb = (r.weight_pounds || "").trim();
+            weight.textContent = (st || lb) ? `${st}st ${lb}lb` : "";
+
+            card.appendChild(rowTop);
+            card.appendChild(trainer);
+            card.appendChild(jockey);
+            card.appendChild(weight);
+
+            section.appendChild(card);
+          });
+
+          racecardEl.appendChild(section);
+        });
+      } catch (err) {
+        racecardEl.textContent = "Error: " + err.message;
+      }
+    })();
+  </script>
 </body>
 </html>
