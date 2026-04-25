@@ -451,11 +451,20 @@
 
     // colours
 if (
-  q.includes("horse 1") &&
+  q.includes("horse 2") &&
   (q.includes("colour") || q.includes("color") || q.includes("silk"))
 ) {
-  playAudio("horse1-silks.mp3");
-  setAnswer("Horse 1's colours.");
+  playAudio("horse2-silks.mp3");
+  setAnswer("Horse 2 — colours.");
+  return "";
+}
+
+if (
+  q.includes("horse 3") &&
+  (q.includes("colour") || q.includes("color") || q.includes("silk"))
+) {
+  playAudio("horse3-silks.mp3");
+  setAnswer("Horse 3 — colours.");
   return "";
 }
     if(q.includes("colour") || q.includes("color") || q.includes("cap") || q.includes("sleeve") || q.includes("silk")){
