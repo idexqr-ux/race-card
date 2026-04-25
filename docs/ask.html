@@ -664,19 +664,21 @@ loadData().then(() => {
   document.getElementById("mode").textContent =
     ttsAvailable ? "Audio-first (TTS available)" : "Text-first (no TTS)";
 
-  if (context === "horse" && contextHorseNo) {
-    const horse = GATECARD.find(
-      h => String(h.horse_no).trim() === String(contextHorseNo).trim()
-    );
+  if (context === "race" && contextRaceNo) {
+  const raceHeader = GATECARD.find(
+    r =>
+      String(r.race_no).trim() === String(contextRaceNo).trim() &&
+      !String(r.horse_no || "").trim()
+  );
 
-    document.getElementById("askTitle").textContent =
-      horse
-        ? `Ask — ${horse.horse_no}. ${horse.horse_name}`
-        : `Ask — Horse ${contextHorseNo}`;
+  document.getElementById("askTitle").textContent =
+    raceHeader
+      ? `Ask — Race ${contextRaceNo}. ${raceHeader.race_name}`
+      : `Ask — Race ${contextRaceNo}`;
 
-    document.getElementById("askSub").textContent =
-      "Spoken answers about this runner’s colours, form, and race details.";
-  }
+  document.getElementById("askSub").textContent =
+    "Spoken answers about this race, its runners, time, and racing terms.";
+}
 
   if (context === "meeting") {
     document.getElementById("askTitle").textContent =
