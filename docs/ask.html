@@ -480,6 +480,25 @@ if (
       return "If you tell me the horse number, I can read the going saved on this card.";
     }
 
+    // form audio
+if (q.includes("horse 1") && q.includes("form")) {
+  playAudio("horse1-form.mp3");
+  setAnswer("Horse 1 — form.");
+  return "";
+}
+
+if (q.includes("horse 2") && q.includes("form")) {
+  playAudio("horse2-form.mp3");
+  setAnswer("Horse 2 — form.");
+  return "";
+}
+
+if (q.includes("horse 3") && q.includes("form")) {
+  playAudio("horse3-form.mp3");
+  setAnswer("Horse 3 — form.");
+  return "";
+}
+
     // summary
     if(q.includes("summary") || q.includes("notes") || q.includes("tell me about")){
       const horse = findHorseFromQuestion(q);
