@@ -256,6 +256,10 @@
  <script>
   // --- Calm speech helpers ---
   const ttsAvailable = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+  const params = new URLSearchParams(window.location.search);
+  const context = params.get("context");
+  const contextRaceNo = params.get("race_no");
+  const contextHorseNo = params.get("horse_no"); 
 
   function setAnswer(text){
     document.getElementById("answer").textContent = text;
