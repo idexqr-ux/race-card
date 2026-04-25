@@ -789,29 +789,19 @@ if (
   if (
     q.includes("damsire") ||
     q.includes("dam sire") ||
-    q.includes("dam's sire")
+    q.includes("dam's sire") ||
+    q.includes("dams sire")
   ) {
     return `${horse.horse_name}'s damsire is ${horse.damsire} (${horse.damsire_country}).`;
   }
 
- if (
-  q.includes("damsire") ||
-  q.includes("dam sire") ||
-  q.includes("dam's sire") ||
-  q.includes("dams sire")
-) {
-  return `${horse.horse_name}'s damsire is ${horse.damsire} (${horse.damsire_country}).`;
-}
+  if (q.includes("sire")) {
+    return `${horse.horse_name} is by ${horse.sire} (${horse.sire_country}).`;
+  }
 
-if (
-  q.includes("dam") &&
-  !q.includes("damsire") &&
-  !q.includes("dam sire") &&
-  !q.includes("dam's sire") &&
-  !q.includes("dams sire")
-) {
-  return `${horse.horse_name}'s dam is ${horse.dam} (${horse.dam_country}).`;
-}
+  if (q.includes("dam")) {
+    return `${horse.horse_name}'s dam is ${horse.dam} (${horse.dam_country}).`;
+  }
 
   return `${horse.horse_name} is by ${horse.sire} (${horse.sire_country}), out of ${horse.dam} (${horse.dam_country}), whose sire was ${horse.damsire} (${horse.damsire_country}).`;
 }
