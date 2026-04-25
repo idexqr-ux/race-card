@@ -459,6 +459,26 @@
     }
 
     if (context === "race" && contextRaceNo) {
+      const runnersInRace = GATECARD.filter(
+  r =>
+    String(r.race_no).trim() === String(contextRaceNo).trim() &&
+    String(r.horse_no || "").trim()
+);
+
+if (
+  q.includes("who is running") ||
+  q.includes("tell me the runners") ||
+  q.includes("who are the runners")
+) {
+  const names = runnersInRace.map(r => r.horse_name);
+  return `The runners in this race are: ${names.join(", ")}.`;
+}
+
+if (
+  q.includes("how many runners")
+) {
+  return `There are ${runnersInRace.length} runners in this race.`;
+}
   const currentRaceNo = Number(contextRaceNo);
 
   const raceHeaders = GATECARD.filter(
