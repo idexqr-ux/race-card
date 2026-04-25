@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Runner</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <a id="backLink" class="back" href="./racing.html">← Back</a>
+
+    <p class="kicker">You are looking at</p>
+    <h1 id="horseName">Runner</h1>
+
+    <p>
+      <button class="quiet-button" type="button" onclick="playAudio('audio/help.mp3')">
+        Listen — I’ll guide you through this
+      </button>
+    </p>
+
+    <div id="meta" class="card"></div>
+
+    <div id="runnerAudio" class="card" style="display:none;">
+      <p class="hint">Listen for more about this horse.</p>
+
+      <p>
+        <button class="quiet-button" id="silksBtn" type="button">
+          Listen — colours
+        </button>
+      </p>
+
+      <p>
+        <button class="quiet-button" id="formBtn" type="button">
+          Listen — form
+        </button>
+      </p>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+  <script>
+    function qs(name) {
+      return new URLSearchParams(location.search).get(name);
+    }
+
+    function parseCSV(text) {
+      const lines = text.split(/\r?\n/).filter(l => l.trim().length);
+      if (!lines.length) return [];
+
+      const splitLine = (line) => {
+        const out = [];
+        let cur = "";
+        let inQ = false;
+
+        for (let i = 0; i < line.length; i++) {
+          const c = line[i], n = line[i + 1];
+          if (c === '"' && inQ && n === '"') {
+            cur += '"';
+            i++;
+            continue;
+          }
+          if (c === '"') {
+            inQ = !inQ;
+            continue;
+          }
+          if (c === ',' && !inQ) {
+            out.push(cur);
+            cur = "";
+            continue;
+          }
+          cur += c;
+        }
+
+        out.push(cur);
+        return out.map(s => s.trim());
+      };
+
+      const headers = splitLine(lines[0]).map(h => String(h).replace(/^\uFEFF/, "").trim());
+
+      return lines.slice(1).map(line => {
+        const cols = splitLine(line);
+        const obj = {};
+        headers.forEach((h, idx) => {
+          obj[h] = (cols[idx] ?? "").trim();
+        });
+        return obj;
+      });
+    }
+
+    async function loadCSV(url) {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(`CSV fetch failed: ${res.status}`);
+      return parseCSV(await res.text());
+    }
+
+    const safe = (s) => (s ?? "—").toString().replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+
+    (async () => {
+      const raceNo = qs("race_no");
+      const horseNo = qs("horse_no");
+      const horseName = qs("horse_name");
+
+      document.getElementById("backLink").href = `./racing.html?race_no=${encodeURIComponent(raceNo || "1")}`;
+
+      if (horseName) {
+        document.getElementById("horseName").textContent = decodeURIComponent(horseName);
+      }
+
+      const url = "./gatecard.csv?x=" + Date.now();
+      const data = await loadCSV(url);
+
+      const r = data.find(x =>
+        String(x.race_no || "").trim() === String(raceNo || "").trim() &&
+        String(x.horse_no || "").trim() === String(horseNo || "").trim()
+      );
+
+      if (!r) {
+        document.getElementById("horseName").textContent = horseName
+          ? decodeURIComponent(horseName)
+          : "Runner";
+        document.getElementById("meta").textContent = "Details unavailable";
+        return;
+      }
+
+      document.getElementById("horseName").textContent =
+        `${r.horse_no || ""}. ${r.horse_name || "Unnamed horse"}`;
+
+      document.getElementById("meta").innerHTML = `
+        <div class="row-top">
+          <div>
+            <div><strong>Meeting:</strong> ${safe(r.meeting_name)}</div>
+            <div><strong>Race:</strong> ${safe(r.race_no)}</div>
+            <div><strong>Age:</strong> ${safe(r.age)}</div>
+            <div><strong>Owner:</strong> ${safe(r.owner)}</div>
+            <div><strong>Trainer:</strong> ${safe(r.trainer_name)}</div>
+            <div><strong>Jockey:</strong> ${safe(r.jockey_name)}</div>
+            <div><strong>Weight:</strong> ${safe(r.weight_stone)}st ${safe(r.weight_pounds)}lb</div>
+            <div><strong>Colours:</strong> ${safe(r.jockey_colours)}</div>
+            <div><strong>Form (code):</strong> ${safe(r.form_code)}</div>
+          </div>
+          ${r.silks_img ? `<img class="silks" src="./${safe(r.silks_img)}" alt="Racing colours">` : ""}
+        </div>
+      `;
+
+      if (["1", "2", "3"].includes(String(horseNo))) {
+        const runnerAudio = document.getElementById("runnerAudio");
+        const silksBtn = document.getElementById("silksBtn");
+        const formBtn = document.getElementById("formBtn");
+
+        silksBtn.onclick = () => playAudio(`audio/horse${horseNo}-silks.mp3`);
+        formBtn.onclick = () => playAudio(`audio/horse${horseNo}-form.mp3`);
+
+        runnerAudio.style.display = "block";
+      }
+    })();
+  </script>
+
+  <script>
+    let currentAudio = null;
+
+    function playAudio(file) {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+      currentAudio = new Audio(file);
+      currentAudio.play();
+    }
+  </script>
+</body>
+</html>
