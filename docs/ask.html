@@ -480,6 +480,37 @@ if (
   return `There are ${runnersInRace.length} runners in this race.`;
 }
   const currentRaceNo = Number(contextRaceNo);
+  if (
+  q.includes("tell me about this race") ||
+  q.includes("race summary") ||
+  q.includes("what is this race")
+) {
+  const raceHeader = GATECARD.find(
+    r =>
+      String(r.race_no).trim() === String(contextRaceNo).trim() &&
+      !String(r.horse_no || "").trim()
+  );
+
+  if (raceHeader) {
+    const parts = [];
+
+    if (raceHeader.race_name) {
+      parts.push(`${raceHeader.race_name} is`);
+    }
+
+    if (raceHeader.race_type) {
+      parts.push(`a ${raceHeader.race_type} race`);
+    }
+
+    if (raceHeader.distance_miles || raceHeader.distance_furlongs) {
+      parts.push(
+        `run over ${raceHeader.distance_miles || 0} miles and ${raceHeader.distance_furlongs || 0} furlongs`
+      );
+    }
+
+    return parts.join(" ") + ".";
+  }
+}    
 
   const raceHeaders = GATECARD.filter(
     r => !String(r.horse_no || "").trim()
