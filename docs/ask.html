@@ -632,18 +632,32 @@ if (q.includes("horse 3") && q.includes("form")) {
     calmSpeak("Voice input will be added later. For now, you can tap a whisper prompt or type a short question, then choose Speak answer.");
   });
 
-  loadData();
-document.getElementById("mode").textContent = ttsAvailable ? "Audio-first (TTS available)" : "Text-first (no TTS)";
+loadData().then(() => {
+  document.getElementById("mode").textContent =
+    ttsAvailable ? "Audio-first (TTS available)" : "Text-first (no TTS)";
 
-if (context === "horse" && contextHorseNo) {
-  document.getElementById("askTitle").textContent = `Ask — Horse ${contextHorseNo}`;
-  document.getElementById("askSub").textContent = "Spoken answers about this runner’s colours, form, and race details.";
-}
+  if (context === "horse" && contextHorseNo) {
+    const horse = GATECARD.find(
+      h => String(h.horse_no).trim() === String(contextHorseNo).trim()
+    );
 
-if (context === "meeting") {
-  document.getElementById("askTitle").textContent = "Ask — Matchem Race Meeting";
-  document.getElementById("askSub").textContent = "Spoken answers about today’s races, runners, times, and racing terms.";
-}
+    document.getElementById("askTitle").textContent =
+      horse
+        ? `Ask — ${horse.horse_no}. ${horse.horse_name}`
+        : `Ask — Horse ${contextHorseNo}`;
+
+    document.getElementById("askSub").textContent =
+      "Spoken answers about this runner’s colours, form, and race details.";
+  }
+
+  if (context === "meeting") {
+    document.getElementById("askTitle").textContent =
+      "Ask — Matchem Race Meeting";
+
+    document.getElementById("askSub").textContent =
+      "Spoken answers about today’s races, runners, times, and racing terms.";
+  }
+});
 </script>
  
 </body>
