@@ -404,6 +404,10 @@
     return name.replace(/\s+\d+$/, ""); // remove trailing " 2"
   }
 
+   function spokenHorseName(horse) {
+  return horse.horse_name_spoken || horse.horse_name;
+}
+
   function findHorseFromQuestion(q) {
   const horseNoMatch = q.match(/horse\s+(\d+)/i);
 
@@ -678,7 +682,7 @@ if (
         const cap = clean(horse.cap_colour) || "not set";
         const body = clean(horse.body_colour) || "not set";
         const sleeves = clean(horse.sleeves_colour) || "not set";
-        return `${horse.horse_name}. Colours: cap ${cap}, body ${body}, sleeves ${sleeves}.`;
+        return `${spokenHorseName(horse)}. Colours: cap ${cap}, body ${body}, sleeves ${sleeves}.`;
       }
       return "If you tell me the horse number or name, I can read the colours as cap, body, sleeves.";
     }
@@ -708,7 +712,7 @@ if (
 
   setAnswer(
     horse
-      ? `${horse.horse_name} — form: ${horse.form_code}`
+      ? `${spokenHorseName(horse)} — form: ${horse.form_code}`
       : `Horse ${askedHorseNo} — form.`
   );
 
@@ -724,7 +728,7 @@ if (q.includes("horse 1") && q.includes("form")) {
 
   setAnswer(
     horse
-      ? `${horse.horse_name} — form: ${horse.form_code}`
+      ? `${spokenHorseName(horse)} — form: ${horse.form_code}`
       : "Horse 1 — form."
   );
 
@@ -740,7 +744,7 @@ if (q.includes("horse 2") && q.includes("form")) {
 
   setAnswer(
     horse
-      ? `${horse.horse_name} — form: ${horse.form_code}`
+      ? `${spokenHorseName(horse)} — form: ${horse.form_code}`
       : "Horse 2 — form."
   );
 
@@ -756,7 +760,7 @@ if (q.includes("horse 3") && q.includes("form")) {
 
   setAnswer(
     horse
-      ? `${horse.horse_name} — form: ${horse.form_code}`
+      ? `${spokenHorseName(horse)} — form: ${horse.form_code}`
       : "Horse 3 — form."
   );
 
@@ -792,25 +796,25 @@ if (
     q.includes("dam's sire") ||
     q.includes("dams sire")
   ) {
-    return `${horse.horse_name}'s dam's sire is ${horse.damsire} (${horse.damsire_country}).`;
+    return `${spokenHorseName(horse)}'s dam's sire is ${horse.damsire} (${horse.damsire_country}).`;
   }
 
   if (q.includes("sire")) {
-    return `${horse.horse_name} is by ${horse.sire} (${horse.sire_country}).`;
+    return `${spokenHorseName(horse)} is by ${horse.sire} (${horse.sire_country}).`;
   }
 
   if (q.includes("dam")) {
-    return `${horse.horse_name}'s dam is ${horse.dam} (${horse.dam_country}).`;
+    return `${spokenHorseName(horse)}'s dam is ${horse.dam} (${horse.dam_country}).`;
   }
 
-  return `${horse.horse_name} is by ${horse.sire} (${horse.sire_country}), out of ${horse.dam} (${horse.dam_country}), whose sire was ${horse.damsire} (${horse.damsire_country}).`;
+  return `${spokenHorseName(horse)} is by ${horse.sire} (${horse.sire_country}), out of ${horse.dam} (${horse.dam_country}), whose sire was ${horse.damsire} (${horse.damsire_country}).`;
 }
     // summary
     if(q.includes("summary") || q.includes("notes") || q.includes("tell me about")){
       const horse = findHorseFromQuestion(q);
       if(horse){
         const bits = [];
-        bits.push(`${horse.horse_name}.`);
+        bits.push(`${spokenHorseName(horse)}.`);
 
         const as = ageSexPhrase(horse.age, horse.sex);
         if(as) bits.push(`${as}.`);
@@ -868,21 +872,35 @@ loadData().then(() => {
   document.getElementById("mode").textContent =
     ttsAvailable ? "Audio-first (TTS available)" : "Text-first (no TTS)";
 
+  if (context === "horse" && contextHorseNo) {
+    const horse = GATECARD.find(
+      h => String(h.horse_no).trim() === String(contextHorseNo).trim()
+    );
+
+    document.getElementById("askTitle").textContent =
+      horse
+        ? `Ask — ${horse.horse_no}. ${horse.horse_name}`
+        : `Ask — Horse ${contextHorseNo}`;
+
+    document.getElementById("askSub").textContent =
+      "Spoken answers about this runner’s colours, form, breeding, and race details.";
+  }
+
   if (context === "race" && contextRaceNo) {
-  const raceHeader = GATECARD.find(
-    r =>
-      String(r.race_no).trim() === String(contextRaceNo).trim() &&
-      !String(r.horse_no || "").trim()
-  );
+    const raceHeader = GATECARD.find(
+      r =>
+        String(r.race_no).trim() === String(contextRaceNo).trim() &&
+        !String(r.horse_no || "").trim()
+    );
 
-  document.getElementById("askTitle").textContent =
-    raceHeader
-      ? `Ask — Race ${contextRaceNo}. ${raceHeader.race_name}`
-      : `Ask — Race ${contextRaceNo}`;
+    document.getElementById("askTitle").textContent =
+      raceHeader
+        ? `Ask — Race ${contextRaceNo}. ${raceHeader.race_name}`
+        : `Ask — Race ${contextRaceNo}`;
 
-  document.getElementById("askSub").textContent =
-    "Spoken answers about this race, its runners, time, and racing terms.";
-}
+    document.getElementById("askSub").textContent =
+      "Spoken answers about this race, its runners, time, and racing terms.";
+  }
 
   if (context === "meeting") {
     document.getElementById("askTitle").textContent =
