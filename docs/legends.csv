@@ -24,3 +24,5 @@ F,sex,Filly,Female horse aged four or younger.,sex
 G,sex,Gelding,Male horse that has been castrated.,sex
 C,sex,Colt,Young male horse.,sex
 GS,distances,Good to Soft,Ground condition between good and soft.,distances
+PU,form,Pulled up,Horse did not finish the race.,form
+P,form,Pulled up,Horse did not finish the race.,form
