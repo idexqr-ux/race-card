@@ -384,11 +384,16 @@
     }
   }
 
-  function findLegend(term){
-    const t = lower(term);
-    if(!t) return null;
-    return LEGENDS.find(x => lower(x.term) === t) || null;
-  }
+ function findLegend(term){
+  const t = lower(term).replace(/[.?!]$/,"");
+  if(!t) return null;
+
+  return LEGENDS.find(x =>
+    lower(x.code) === t ||
+    lower(x.title) === t ||
+    lower(x.definition) === t
+  ) || null;
+}
 
   function spokenName(name){
     if(!name) return "";
@@ -445,7 +450,7 @@
     if(meanMatch){
       const term = clean(meanMatch[1]).replace(/[.?!]$/,"");
       const hit = findLegend(term);
-      if(hit) return `${hit.meaning}.`; // speak meaning only
+      if(hit) return `${hit.definition}.`;
       return "I don’t have that term saved yet. If you add it to legends.csv, I’ll learn it.";
     }
 
