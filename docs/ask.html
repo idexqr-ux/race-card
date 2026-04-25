@@ -404,15 +404,30 @@
     return name.replace(/\s+\d+$/, ""); // remove trailing " 2"
   }
 
-  function findHorseFromQuestion(q){
-    const m = q.match(/(?:horse\s*)?#?(\d{1,2})\b/);
-    if(m && INDEX_BY_NO.has(m[1])) return INDEX_BY_NO.get(m[1]);
+  function findHorseFromQuestion(q) {
+  const horseNoMatch = q.match(/horse\s+(\d+)/i);
 
-    for(const [nm, row] of INDEX_BY_NAME.entries()){
-      if(q.includes(nm)) return row;
-    }
-    return null;
+  if (horseNoMatch) {
+    const horseNo = horseNoMatch[1];
+
+    const byNo = GATECARD.find(
+      h => String(h.horse_no).trim() === String(horseNo).trim()
+    );
+
+    if (byNo) return byNo;
   }
+
+  for (const row of GATECARD) {
+    if (
+      row.horse_name &&
+      q.includes(row.horse_name.toLowerCase())
+    ) {
+      return row;
+    }
+  }
+
+  return null;
+}
 
   function sexToWord(sexRaw){
     const s = lower(sexRaw);
