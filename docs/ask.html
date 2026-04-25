@@ -459,6 +459,34 @@
     }
 
     // race-level context
+    // natural meeting language
+if (
+  q.includes("first race") &&
+  (q.includes("when") || q.includes("time"))
+) {
+  return "The first race is the Golden Stirrup at 1:45pm.";
+}
+
+if (
+  q.includes("next race") &&
+  (q.includes("when") || q.includes("time"))
+) {
+  return "The next race is the Golden Stirrup at 1:45pm.";
+}
+
+if (
+  q.includes("what's next") ||
+  q.includes("what is next") ||
+  q.includes("what comes next")
+) {
+  return "Next is Race 1, the Golden Stirrup at 1:45pm.";
+}
+
+if (
+  q.includes("after this")
+) {
+  return "After Race 1 comes Race 2, the Crystal Bowl at 2:30pm.";
+}
 if (q.includes("race 1") && (q.includes("time") || q.includes("when"))) {
   return "Race 1 is the Golden Stirrup at 1:45pm.";
 }
