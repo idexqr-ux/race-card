@@ -487,7 +487,25 @@ if (q.includes("what races") || q.includes("what is on today")) {
   return "There are two races on this card: Race 1, the Golden Stirrup at 1:45pm, and Race 2, the Crystal Bowl at 2:30pm.";
 }    
 
-    // colours
+  const askedHorseNo = context === "horse" && contextHorseNo ? contextHorseNo : null;
+
+// colours
+if (
+  askedHorseNo &&
+  (q.includes("colour") || q.includes("color") || q.includes("silk"))
+) {
+  playAudio(`horse${askedHorseNo}-silks.mp3`);
+  setAnswer(`Horse ${askedHorseNo} — colours.`);
+  return "";
+}
+    if (
+  q.includes("horse 1") &&
+  (q.includes("colour") || q.includes("color") || q.includes("silk"))
+) {
+  playAudio("horse1-silks.mp3");
+  setAnswer("Horse 1 — colours.");
+  return "";
+}
 if (
   q.includes("horse 2") &&
   (q.includes("colour") || q.includes("color") || q.includes("silk"))
@@ -528,6 +546,15 @@ if (
     }
 
     // form audio
+    // form audio from horse context
+if (
+  askedHorseNo &&
+  q.includes("form")
+) {
+  playAudio(`horse${askedHorseNo}-form.mp3`);
+  setAnswer(`Horse ${askedHorseNo} — form.`);
+  return "";
+}
 if (q.includes("horse 1") && q.includes("form")) {
   playAudio("horse1-form.mp3");
   setAnswer("Horse 1 — form.");
