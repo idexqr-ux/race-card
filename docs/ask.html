@@ -458,6 +458,55 @@
       return "I don’t have that term saved yet. If you add it to legends.csv, I’ll learn it.";
     }
 
+    if (context === "race" && contextRaceNo) {
+  const currentRaceNo = Number(contextRaceNo);
+
+  const raceHeaders = GATECARD.filter(
+    r => !String(r.horse_no || "").trim()
+  );
+
+  const sortedRaceNos = raceHeaders
+    .map(r => Number(r.race_no))
+    .sort((a, b) => a - b);
+
+  const currentIndex = sortedRaceNos.indexOf(currentRaceNo);
+  const nextRaceNo = sortedRaceNos[currentIndex + 1];
+
+  const nextRace = GATECARD.find(
+    r =>
+      Number(r.race_no) === nextRaceNo &&
+      !String(r.horse_no || "").trim()
+  );
+
+  if (
+    q.includes("what's next") ||
+    q.includes("what is next") ||
+    q.includes("next race")
+  ) {
+    return nextRace
+      ? `Next is Race ${nextRace.race_no}, the ${nextRace.race_name} at ${nextRace.race_time}.`
+      : "This is the final race on the card.";
+  }
+
+  if (
+    q.includes("last race") ||
+    q.includes("final race")
+  ) {
+    return currentIndex === sortedRaceNos.length - 1
+      ? "Yes, this is the final race on the card."
+      : "No, there are more races to follow.";
+  }
+
+  if (
+    q.includes("how many races remain")
+  ) {
+    const remaining = sortedRaceNos.length - currentIndex - 1;
+    return remaining === 0
+      ? "There are no races remaining after this one."
+      : `There ${remaining === 1 ? "is" : "are"} ${remaining} race${remaining === 1 ? "" : "s"} remaining after this one.`;
+  }
+}
+
     // race-level context
     // natural meeting language
 if (
