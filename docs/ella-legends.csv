@@ -1,0 +1,33 @@
+﻿Legend Term,Race Terminology,Human Meaning,Spoken Status,Spoken Convention,Notes
+sire,,father of the horse,Spoken (primary),“by Metor”,Always comes first if known
+dam,,mother of the horse,Spoken (primary),“out of Token”,Paired with sire
+sire + dam,,parentage together (Breeding),Spoken (combined),"“Seven is by Metor, out of Token.”",Preferred natural phrasing
+damsire,,dam’s sire,Optional (spoken if asked or relevant),“The damsire is Galileo.”,"Added gently, never forced"
+owner ,,registered owner,Optional (spoken if asked),“owned by…”,Not pushed unless queried
+breeder,,breeder of the horse,Optional (spoken if asked),“bred by…”,"Calm, factual tone"
+trainer,,trainer,Optional,“trained by…”,Only if part of the question
+jockey / rider,,rider,Optional,“ridden by…”,Event-specific
+,up,rider,Optional,“ridden by…”,
+sex,,"colt, filly, gelding etc.",Silent by default,—,Spoken only if asked
+age,,age of horse,Silent by default,—,Spoken if relevant to question
+colour,,colour,Silent by default,—,Spoken if relevant to question
+breed,,breed/type,Optional,“a [breed]”,Context dependent
+race number,,number in card,Spoken (naturalised),“Seven” not “Number Seven”,"Always words, not digits"
+horse name,,registered name,Spoken,As named,Never abbreviated
+runner reference,,referring back,Spoken (soft),"“this horse”, “she”, “he”",Avoid repetition
+,meeting,refers to whole race card,Silent by default,_,refers to the whole race card 
+weight,,horse carrying,Optional,"""eleven-four""",This is the jockeys weight plus a weight specified by class type or weight gained by performance - No needed its NOTE
+Qualify,,Hunt for PtP,Optional,_,But no mention of Hunt for Bloodhounds.  I have only entered the name of hunt but not included the word Hunt on excel
+Sponsor ing,,Race sponsor,Silent by default,_,Spoken if relevant to question
+Time,,Race time,Spoken ,As named,Said in 12 clock 
+"IRE,GB,GER,USA",,bred in that country,Optional (spoken if asked),"""country"" or ""Irish bred""","Given when asked by runner name or number or sire, dam, damsire or by there names as Irish bred - needs more thought"
+Number,,refers to horse number in race card,Spoken,As numbered,Number the horse is wearing
+Race name,,refers to race type ,Spoken ,"Sponsor name or trophy name, type or just type",Full name & type of race
+Distance,,refers to length of race,Optional (spoken if asked),"""miles furlongs""",said in miles & furlongs
+Colours,,refers to jockey colours ,Silent by default,_,Colours jockey is riding in
+Silks,,refers to jockey colours ,Silent by default,_,Another name of colours jockey riding in
+,Called,refers to all with names,Silent by default,_,"Would refere to all names owners, jockeys, race, meeting, horse, trainer"
+,Entered,number of horses race/day,Silent by default,"""three""",Would refere to all horse by race or racecard by a gross number
+,Entries ,number of horses race/day,Silent by default,"""three""",Would refere to all horse by race or racecard by a gross number
+Height,,Height of horse,Optional,"""[number.number]""","Said as sixteen, three Context dependent"
+,Progamme,refers to race card,Silent by default,_,refers to the whole race card
