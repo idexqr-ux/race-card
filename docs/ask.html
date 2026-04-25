@@ -633,7 +633,17 @@ if (q.includes("horse 3") && q.includes("form")) {
   });
 
   loadData();
-  document.getElementById("mode").textContent = ttsAvailable ? "Audio-first (TTS available)" : "Text-first (no TTS)";
+document.getElementById("mode").textContent = ttsAvailable ? "Audio-first (TTS available)" : "Text-first (no TTS)";
+
+if (context === "horse" && contextHorseNo) {
+  document.getElementById("askTitle").textContent = `Ask — Horse ${contextHorseNo}`;
+  document.getElementById("askSub").textContent = "Spoken answers about this runner’s colours, form, and race details.";
+}
+
+if (context === "meeting") {
+  document.getElementById("askTitle").textContent = "Ask — Matchem Race Meeting";
+  document.getElementById("askSub").textContent = "Spoken answers about today’s races, runners, times, and racing terms.";
+}
 </script>
  
 </body>
